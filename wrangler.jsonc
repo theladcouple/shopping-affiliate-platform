@@ -1,14 +1,1 @@
 
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "shopping-affiliate-platform",
-  "pages_build_output_dir": ".",
-  "compatibility_date": "2026-11-17",
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "shopping_affiliate_db",
-      "database_id": "94ebd251-913b-4768-a9b4-5f6894f77319"
-    }
-  ]
-}
