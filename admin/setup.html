@@ -1,90 +1,44 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Setup</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-      display: grid;
-      place-items: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-    .card {
-      background: white;
-      padding: 30px;
-      border-radius: 14px;
-      width: min(90%, 380px);
-      box-sizing: border-box;
-      box-shadow: 0 8px 30px #0001;
-    }
-    h2 { margin-top: 0; }
-    input, button {
-      width: 100%;
-      padding: 13px;
-      margin: 9px 0;
-      box-sizing: border-box;
-      border-radius: 7px;
-      border: 1px solid #cbd5e1;
-      font-size: 15px;
-    }
-    button {
-      background: #2563eb;
-      color: white;
-      border: 0;
-      cursor: pointer;
-    }
-    #message { overflow-wrap: anywhere; }
-  </style>
-</head>
-<body>
-  <main class="card">
-    <h2>Create Admin Account</h2>
-    <form id="setupForm">
-      <input type="email" id="email" placeholder="Admin email" required>
-      <input type="password" id="password" placeholder="Password (minimum 12 characters)" minlength="12" maxlength="128" required>
-      <input type="password" id="secret" placeholder="Setup Secret" required>
-      <button type="submit">Create Admin Account</button>
-    </form>
-    <p id="message" role="status"></p>
-  </main>
+<script>
+document.getElementById("setupForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-  <script>
-    document.getElementById("setupForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
+  const message = document.getElementById("message");
+  const button = event.target.querySelector("button");
+  button.disabled = true;
+  message.textContent = "Creating account...";
 
-      const message = document.getElementById("message");
-      const button = event.target.querySelector("button");
-      button.disabled = true;
-      message.textContent = "Creating account...";
-
-      try {
-        const response = await fetch("/api/admin/setup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: document.getElementById("email").value.trim(),
-            password: document.getElementById("password").value,
-            setupSecret: document.getElementById("secret").value
-          })
-        });
-
-        const data = await response.json();
-        message.textContent = data.message || data.error || "Something went wrong.";
-
-        if (data.success) {
-          event.target.reset();
-        }
-      } catch (error) {
-        message.textContent = "Request failed. Please try again.";
-      } finally {
-        button.disabled = false;
-      }
+  try {
+    const response = await fetch("/api/admin/setup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value,
+        setupSecret: document.getElementById("secret").value
+      })
     });
-  </script>
-</body>
-</html>
+
+    const raw = await response.text();
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error("HTTP " + response.status + ": " + raw.slice(0, 250));
+    }
+
+    if (!response.ok || !data.success) {
+      throw new Error("HTTP " + response.status + ": " + (data.error || "Request failed"));
+    }
+
+    message.textContent = data.message;
+    event.target.reset();
+
+  } catch (error) {
+    message.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+</script>
