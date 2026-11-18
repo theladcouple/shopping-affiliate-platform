@@ -818,18 +818,36 @@ details.append(name, code, info);
       });
     }
 
-    function resetProductForm() {
-      productForm.reset();
+    
+function resetProductForm() {
+  productForm.reset();
 
-      document.getElementById("productId").value = "";
-      document.getElementById("productFormTitle").textContent =
-        "Add New Product";
-      document.getElementById("productSubmitButton").textContent =
-        "Add Product";
-      document.getElementById("cancelProductEdit").style.display =
-        "none";
-      document.getElementById("productMessage").textContent = "";
-    }
+  document.getElementById("productId").value = "";
+  document.getElementById("productTitle").value = "";
+  document.getElementById("productSlug").value = "";
+  document.getElementById("productDescription").value = "";
+  document.getElementById("productImage").value = "";
+  document.getElementById("productPrice").value = "";
+  document.getElementById("productOriginalPrice").value = "";
+  document.getElementById("productCategory").value = "";
+  document.getElementById("productAmazon").value = "";
+  document.getElementById("productFlipkart").value = "";
+  document.getElementById("productMeesho").value = "";
+  document.getElementById("productStatus").value = "draft";
+  document.getElementById("productFeatured").checked = false;
+
+  document.getElementById("productFormTitle").textContent =
+    "Add New Product";
+
+  document.getElementById("productSubmitButton").textContent =
+    "Add Product";
+
+  document.getElementById("cancelProductEdit").style.display =
+    "none";
+
+  document.getElementById("productMessage").textContent = "";
+}
+
 
     document.getElementById("cancelProductEdit").addEventListener(
       "click",
