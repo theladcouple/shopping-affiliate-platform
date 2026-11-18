@@ -69,6 +69,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderProducts(products) {
+    function filterByCategory(categoryId) {
+  const filtered = allProducts.filter(product =>
+    Number(product.category_id) === Number(categoryId)
+  );
+
+  renderProducts(filtered);
+
+  productSection.scrollIntoView({ behavior: "smooth" });
+}
     if (!products.length) {
       productContainer.innerHTML = `
         <span>🛒</span>
