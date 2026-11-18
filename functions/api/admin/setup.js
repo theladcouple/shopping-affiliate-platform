@@ -14,7 +14,7 @@ async function hashPassword(password) {
     {
       name: "PBKDF2",
       salt,
-      iterations: 310000,
+      iterations: 100000,
       hash: "SHA-256"
     },
     key,
@@ -24,7 +24,7 @@ async function hashPassword(password) {
   const toBase64 = bytes =>
     btoa(String.fromCharCode(...bytes));
 
-  return `pbkdf2_sha256$310000$${toBase64(salt)}$${toBase64(new Uint8Array(bits))}`;
+  return `pbkdf2_sha256$100000$${toBase64(salt)}$${toBase64(new Uint8Array(bits))}`;
 }
 
 export async function onRequestPost({ request, env }) {
