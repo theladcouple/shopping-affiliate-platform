@@ -128,7 +128,9 @@ const platforms = [
 `).join("");
 
     return `
-      <article class="product-card">
+      <article class="product-card"
+               data-product-id="${escapeHTML(product.id)}"
+               data-product-title="${escapeHTML(product.title)}">
         <img src="${escapeHTML(product.image_url || "")}"
              alt="${escapeHTML(product.title)}"
              onerror="this.style.display='none'">
