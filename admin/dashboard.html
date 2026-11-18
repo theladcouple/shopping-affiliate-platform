@@ -919,13 +919,15 @@ details.append(name, code, info);
           throw new Error(data.error || "Unable to save product");
         }
 
-        message.textContent = id
+                const successMessage = id
           ? "Product updated successfully!"
           : "Product added successfully!";
 
+        resetProductForm();
+
+        message.textContent = successMessage;
         message.style.color = "green";
 
-        resetProductForm();
         await loadProducts();
 
       } catch (error) {
