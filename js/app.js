@@ -94,34 +94,38 @@ function renderProducts(products) {
 
   productContainer.innerHTML = products.map(product => {
 
-    const platforms = [
-      {
-        name: "Amazon",
-        url: product.amazon_url,
-        className: "amazon"
-      },
-      {
-        name: "Flipkart",
-        url: product.flipkart_url,
-        className: "flipkart"
-      },
-      {
-        name: "Meesho",
-        url: product.meesho_url,
-        className: "meesho"
-      }
-    ];
+const platforms = [
+  {
+    name: "Amazon",
+    icon: "🛒",
+    url: (product.amazon_url || "").trim(),
+    className: "amazon"
+  },
+  {
+    name: "Flipkart",
+    icon: "🛍️",
+    url: (product.flipkart_url || "").trim(),
+    className: "flipkart"
+  },
+  {
+    name: "Meesho",
+    icon: "💗",
+    url: (product.meesho_url || "").trim(),
+    className: "meesho"
+  }
+];
 
     const buyButtons = platforms
       .filter(platform => platform.url)
-      .map(platform => `
-        <a class="platform-btn ${platform.className}"
-           href="${escapeHTML(platform.url)}"
-           target="_blank"
-           rel="noopener noreferrer">
-          ${platform.name} - Buy Now
-        </a>
-      `).join("");
+.map(platform => `
+  <a class="platform-btn ${platform.className}"
+     href="${escapeHTML(platform.url)}"
+     target="_blank"
+     rel="noopener noreferrer">
+    <span>${platform.icon}</span>
+    ${platform.name} - Buy Now
+  </a>
+`).join("");
 
     return `
       <article class="product-card">
@@ -143,7 +147,7 @@ function renderProducts(products) {
           </p>
 
           <div class="platform-links">
-            ${buyButtons || "<p>Links coming soon</p>"}
+            ${buyButtons}
           </div>
         </div>
       </article>
