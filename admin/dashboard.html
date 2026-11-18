@@ -246,21 +246,33 @@
         </div>
 
         <div class="cards">
-          <div class="card">
-            <p>Total Products</p>
-            <h3 id="totalProducts">—</h3>
-          </div>
 
-          <div class="card">
-            <p>Total Categories</p>
-            <h3 id="totalCategories">—</h3>
-          </div>
+  <div class="card">
+    <p>Total Products</p>
+    <h3 id="totalProducts">—</h3>
+  </div>
 
-          <div class="card">
-            <p>Total Clicks</p>
-            <h3 id="totalClicks">—</h3>
-          </div>
-        </div>
+  <div class="card">
+    <p>Total Categories</p>
+    <h3 id="totalCategories">—</h3>
+  </div>
+
+  <div class="card">
+    <p>Published Products</p>
+    <h3 id="publishedProducts">—</h3>
+  </div>
+
+  <div class="card">
+    <p>Draft Products</p>
+    <h3 id="draftProducts">—</h3>
+  </div>
+
+  <div class="card">
+    <p>Total Clicks</p>
+    <h3 id="totalClicks">—</h3>
+  </div>
+
+</div>
 
         <div class="panel">
           <h3>Website Management</h3>
@@ -484,7 +496,8 @@
         if (!response.ok || !data.success) {
           throw new Error(data.error || "Unable to load categories");
         }
-
+document.getElementById("totalCategories").textContent =
+  data.categories.length;
         list.replaceChildren();
 
         if (data.categories.length === 0) {
@@ -717,7 +730,16 @@ name.textContent = category.name;
         if (!response.ok || !data.success) {
           throw new Error(data.error || "Unable to load products");
         }
+const products = data.products || [];
 
+document.getElementById("totalProducts").textContent =
+  products.length;
+
+document.getElementById("publishedProducts").textContent =
+  products.filter(product => product.status === "published").length;
+
+document.getElementById("draftProducts").textContent =
+  products.filter(product => product.status === "draft").length;
         list.replaceChildren();
 
         if (!data.products || data.products.length === 0) {
