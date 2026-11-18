@@ -137,6 +137,17 @@ document.addEventListener("DOMContentLoaded", () => {
   searchInput.addEventListener("keydown", event => {
     if (event.key === "Enter") searchProducts();
   });
+    const categoryGrid = document.getElementById("categoryGrid");
+
+  categoryGrid.addEventListener("click", event => {
+    const categoryLink = event.target.closest("a[data-category-id]");
+
+    if (!categoryLink) return;
+
+    event.preventDefault();
+
+    filterByCategory(categoryLink.dataset.categoryId);
+  });
 loadCategories();
   loadProducts();
 });
