@@ -74,7 +74,7 @@ export async function onRequestPost({ request, env }) {
     return json({
       success: true,
       message: "Image uploaded successfully",
-      image_url: `/api/images/${filename}`,
+      image_url: `${new URL(request.url).origin}/api/images/${filename}`,
       filename,
       size: file.size
     }, 201);
