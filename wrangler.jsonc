@@ -10,6 +10,11 @@
       "database_name": "shopping_affiliate_db",
       "database_id": "94ebd251-913b-4768-a9b4-5f6894f77319"
     }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "the-lad-couple-store-images"
+    }
   ]
 }
-
