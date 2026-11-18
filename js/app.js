@@ -77,40 +77,80 @@ function filterByCategory(categoryId) {
   productSection.scrollIntoView({ behavior: "smooth" });
 }
 
+
 function renderProducts(products) {
-   
-    if (!products.length) {
+
+  if (!products.length) {
     productContainer.className = "empty-products";
-      productContainer.innerHTML = `
-        <span>🛒</span>
-        <h3>Products Coming Soon</h3>
-        <p>We are preparing amazing products for you. Stay tuned!</p>
-      `;
-      return;
-    }
-
-    productContainer.className = "product-grid";
-
-    productContainer.innerHTML = products.map(product => {
-      const buyUrl = product.amazon_url || product.flipkart_url || product.meesho_url;
-
-      return `
-        <article class="product-card">
-          <img src="${escapeHTML(product.image_url || "")}"
-               alt="${escapeHTML(product.title)}"
-               onerror="this.style.display='none'">
-          <div class="product-info">
-            <p class="product-category">${escapeHTML(product.category_name || "Shopping")}</p>
-            <h3>${escapeHTML(product.title)}</h3>
-            <p class="product-price">
-              ${product.price != null ? "₹" + Number(product.price).toLocaleString("en-IN") : "Price unavailable"}
-            </p>
-            ${buyUrl ? `<a class="primary-btn" href="${escapeHTML(buyUrl)}" target="_blank" rel="noopener noreferrer">Buy Now</a>` : ""}
-          </div>
-        </article>
-      `;
-    }).join("");
+    productContainer.innerHTML = `
+      <span>🛒</span>
+      <h3>Products Coming Soon</h3>
+      <p>We are preparing amazing products for you. Stay tuned!</p>
+    `;
+    return;
   }
+
+  productContainer.className = "product-grid";
+
+  productContainer.innerHTML = products.map(product => {
+
+    const platforms = [
+      {
+        name: "Amazon",
+        url: product.amazon_url,
+        className: "amazon"
+      },
+      {
+        name: "Flipkart",
+        url: product.flipkart_url,
+        className: "flipkart"
+      },
+      {
+        name: "Meesho",
+        url: product.meesho_url,
+        className: "meesho"
+      }
+    ];
+
+    const buyButtons = platforms
+      .filter(platform => platform.url)
+      .map(platform => `
+        <a class="platform-btn ${platform.className}"
+           href="${escapeHTML(platform.url)}"
+           target="_blank"
+           rel="noopener noreferrer">
+          ${platform.name} - Buy Now
+        </a>
+      `).join("");
+
+    return `
+      <article class="product-card">
+        <img src="${escapeHTML(product.image_url || "")}"
+             alt="${escapeHTML(product.title)}"
+             onerror="this.style.display='none'">
+
+        <div class="product-info">
+          <p class="product-category">
+            ${escapeHTML(product.category_name || "Shopping")}
+          </p>
+
+          <h3>${escapeHTML(product.title)}</h3>
+
+          <p class="product-price">
+            ${product.price != null
+              ? "₹" + Number(product.price).toLocaleString("en-IN")
+              : "Price unavailable"}
+          </p>
+
+          <div class="platform-links">
+            ${buyButtons || "<p>Links coming soon</p>"}
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
 
   function escapeHTML(value) {
     return String(value).replace(/[&<>"']/g, char => ({
