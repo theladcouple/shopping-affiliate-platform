@@ -7,6 +7,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let allProducts = [];
 
+ 
+    async function loadCategories() {
+  const categoryGrid = document.getElementById("categoryGrid");
+
+  try {
+    const response = await fetch("/api/categories");
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error("Categories could not load");
+    }
+
+    const icons = {
+      electronics: "📱",
+      "mobiles-accessories": "📱",
+      fashion: "👗",
+      "home-kitchen": "🏠",
+      beauty: "💄",
+      "health-fitness": "💪",
+      "sports-outdoors": "⚽",
+      "grocery-daily-needs": "🛒",
+      "shoes-footwear": "👟",
+      "bags-luggage": "👜",
+      "toys-baby-products": "🧸",
+      "books-stationery": "📚"
+    };
+
+    categoryGrid.innerHTML = (data.categories || []).map(category => `
+      <a class="category-card" href="#products">
+        <span>${icons[category.slug] || "🛍️"}</span>
+        <h3>${escapeHTML(category.name)}</h3>
+      </a>
+    `).join("");
+
+    if (!data.categories || data.categories.length === 0) {
+      categoryGrid.innerHTML = "<p>No categories available.</p>";
+    }
+
+  } catch (error) {
+    categoryGrid.innerHTML = "<p>Unable to load categories.</p>";
+  }
+}
   async function loadProducts() {
     try {
       const response = await fetch("/api/products");
@@ -86,6 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
   searchInput.addEventListener("keydown", event => {
     if (event.key === "Enter") searchProducts();
   });
-
+loadCategories();
   loadProducts();
 });
