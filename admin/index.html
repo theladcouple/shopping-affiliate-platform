@@ -108,13 +108,62 @@
     <p class="notice">Secure administrator access</p>
   </main>
 
-  <script>
-    document.getElementById("loginForm").addEventListener("submit", function(event) {
-      event.preventDefault();
-      alert("Login security is being set up. Please wait for the next update.");
-    });
-  </script>
+  
+<script>
+  document.getElementById("loginForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
 
+    const form = event.target;
+    const button = form.querySelector("button");
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    let message = document.getElementById("loginMessage");
+
+    if (!message) {
+      message = document.createElement("p");
+      message.id = "loginMessage";
+      message.style.marginTop = "18px";
+      message.style.textAlign = "center";
+      form.after(message);
+    }
+
+    button.disabled = true;
+    button.textContent = "Please wait...";
+    message.style.color = "#64748b";
+    message.textContent = "Checking login details...";
+
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "same-origin",
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      message.style.color = "green";
+      message.textContent = "Login successful! Your secure session is created.";
+
+      form.reset();
+
+    } catch (error) {
+      message.style.color = "red";
+      message.textContent = error.message || "Unable to connect. Please try again.";
+    } finally {
+      button.disabled = false;
+      button.textContent = "Login to Dashboard";
+    }
+  });
+</script>
 </body>
 </html>
+
 
