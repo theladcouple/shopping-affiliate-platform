@@ -314,7 +314,26 @@
             <p style="margin-top:12px">Product Image URL</p>
             <input id="productImage" type="url"
               placeholder="https://example.com/product.jpg">
+<p style="margin-top:12px">Upload Product Image</p>
 
+<input
+  id="productImageFile"
+  type="file"
+  accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+>
+
+<p style="margin-top:8px;color:#64748b;font-size:13px">
+  JPG, JPEG, PNG, WEBP, AVIF आणि GIF स्वीकारले जातील.
+  कमाल आकार 500 KB.
+</p>
+
+<div id="imageUploadStatus" style="margin-top:10px"></div>
+
+<img
+  id="productImagePreview"
+  alt="Product image preview"
+  style="display:none;width:120px;height:120px;object-fit:contain;margin-top:10px;border:1px solid #ddd;border-radius:8px"
+>
             <p style="margin-top:12px">Price (₹)</p>
             <input id="productPrice" type="number" min="0" step="0.01"
               placeholder="999">
@@ -678,8 +697,86 @@ name.textContent = category.name;
         loadCategories();
 
     // PRODUCT MANAGEMENT
+// PRODUCT IMAGE UPLOAD
 
-    const productForm = document.getElementById("productForm");
+const productImageFile = document.getElementById("productImageFile");
+const productImage = document.getElementById("productImage");
+const imageUploadStatus = document.getElementById("imageUploadStatus");
+const productImagePreview = document.getElementById("productImagePreview");
+
+
+productImageFile.addEventListener("change", async () => {
+  const file = productImageFile.files[0];
+
+  if (!file) return;
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/avif",
+    "image/gif"
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    imageUploadStatus.textContent = "हा फोटो प्रकार स्वीकारला जात नाही.";
+    imageUploadStatus.style.color = "red";
+    productImageFile.value = "";
+    return;
+  }
+
+  if (file.size > 500 * 1024) {
+    imageUploadStatus.textContent = "फोटोचा आकार 500 KB पेक्षा कमी असावा.";
+    imageUploadStatus.style.color = "red";
+    productImageFile.value = "";
+    return;
+  }
+
+  const submitButton =
+    document.getElementById("productSubmitButton");
+
+  submitButton.disabled = true;
+
+  imageUploadStatus.textContent = "फोटो अपलोड होत आहे...";
+  imageUploadStatus.style.color = "#64748b";
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  try {
+    const response = await fetch("/api/admin/upload", {
+      method: "POST",
+      credentials: "same-origin",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "फोटो अपलोड झाला नाही.");
+    }
+
+    productImage.value = data.image_url;
+
+    productImagePreview.src = data.image_url;
+    productImagePreview.style.display = "block";
+
+    imageUploadStatus.textContent = "फोटो यशस्वीपणे अपलोड झाला!";
+    imageUploadStatus.style.color = "green";
+
+  } catch (error) {
+    imageUploadStatus.textContent = error.message;
+    imageUploadStatus.style.color = "red";
+
+  } finally {
+    submitButton.disabled = false;
+  }
+});
+
+
+  
+
+        const productForm = document.getElementById("productForm");
 
     async function loadProductCategories() {
       const select = document.getElementById("productCategory");
@@ -811,6 +908,14 @@ details.append(name, code, info);
         product.description || "";
       document.getElementById("productImage").value =
         product.image_url || "";
+      productImageFile.value = "";
+
+imageUploadStatus.textContent = "";
+
+productImagePreview.src = product.image_url || "";
+
+productImagePreview.style.display =
+  product.image_url ? "block" : "none";
       document.getElementById("productPrice").value =
         product.price ?? "";
       document.getElementById("productOriginalPrice").value =
@@ -849,6 +954,13 @@ function resetProductForm() {
   document.getElementById("productSlug").value = "";
   document.getElementById("productDescription").value = "";
   document.getElementById("productImage").value = "";
+  productImageFile.value = "";
+
+productImagePreview.removeAttribute("src");
+
+productImagePreview.style.display = "none";
+
+imageUploadStatus.textContent = "";
   document.getElementById("productPrice").value = "";
   document.getElementById("productOriginalPrice").value = "";
   document.getElementById("productCategory").value = "";
