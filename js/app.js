@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     categoryGrid.innerHTML = (data.categories || []).map(category => `
-      <a class="category-card" href="#products">
+      <a class="category-card" href="#products" data-category-id="${category.id}">
         <span>${icons[category.slug] || "🛍️"}</span>
         <h3>${escapeHTML(category.name)}</h3>
       </a>
