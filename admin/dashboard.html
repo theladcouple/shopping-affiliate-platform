@@ -274,9 +274,8 @@
           </div>
         </div>
       </section>
-      
+      <section class="content" id="categories">
 <section class="content" id="products">
-  <section class="content" id="categories">
         <div class="welcome">
           <h2>Product Management</h2>
           <p>Add, edit and manage affiliate products.</p>
@@ -738,13 +737,22 @@
           name.textContent = product.title;
 
           const info = document.createElement("p");
-          info.style.cssText = "color:#64748b;margin-top:5px";
-          info.textContent =
-            "Category: " + (product.category_name || "None") +
-            " | Price: ₹" + (product.price ?? "N/A") +
-            " | Status: " + product.status;
+          const code = document.createElement("p");
+code.style.cssText =
+  "color:#1d4ed8;font-weight:bold;margin-top:7px;font-size:14px";
 
-          details.append(name, info);
+code.textContent =
+  "Product Code: " + (product.product_code || "Not assigned");
+
+const info = document.createElement("p");
+info.style.cssText = "color:#64748b;margin-top:5px";
+
+info.textContent =
+  "Category: " + (product.category_name || "None") +
+  " | Price: ₹" + (product.price ?? "N/A") +
+  " | Status: " + product.status;
+
+details.append(name, code, info);
 
           const actions = document.createElement("div");
 
