@@ -70,9 +70,9 @@
 
   const productObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (!entry.isIntersecting || entry.intersectionRatio < 0.5) {
-        return;
-      }
+      if (!entry.isIntersecting) {
+  return;
+}
 
       const productCard = entry.target;
 
@@ -88,7 +88,7 @@
       productObserver.unobserve(productCard);
     });
   }, {
-    threshold: 0.5
+    threshold: 0.1
   });
 
   function observeProductCards() {
