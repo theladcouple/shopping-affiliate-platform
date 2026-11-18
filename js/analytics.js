@@ -62,17 +62,15 @@
     }).catch(() => {});
   }
 
-  // Website page visit
+  // WEBSITE PAGE VISIT
   track("page_view");
 
-  // Product View Tracking
+  // PRODUCT VIEW TRACKING
   const viewedProducts = new WeakSet();
 
   const productObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (!entry.isIntersecting) {
-  return;
-}
+      if (!entry.isIntersecting) return;
 
       const productCard = entry.target;
 
@@ -99,7 +97,7 @@
     });
   }
 
-  // Observe products loaded dynamically
+  // OBSERVE DYNAMICALLY LOADED PRODUCTS
   const productMutationObserver = new MutationObserver(() => {
     observeProductCards();
   });
@@ -111,20 +109,25 @@
 
   observeProductCards();
 
-  // Buy Now button click
+  // BUY NOW CLICK TRACKING WITH PRODUCT DETAILS
   document.addEventListener("click", function (event) {
     const button = event.target.closest(".platform-btn");
 
     if (!button) return;
 
-    let platform = "other";
+    let platform = "Other";
 
     if (button.classList.contains("amazon")) platform = "Amazon";
     if (button.classList.contains("flipkart")) platform = "Flipkart";
     if (button.classList.contains("meesho")) platform = "Meesho";
 
+    const productCard = button.closest(".product-card");
+
     track("buy_click", {
-      affiliate_platform: platform
+      affiliate_platform: platform,
+      product_id: Number(productCard?.dataset.productId) || null,
+      product_title: productCard?.dataset.productTitle || null
     });
   });
+
 })();
