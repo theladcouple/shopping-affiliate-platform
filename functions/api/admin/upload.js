@@ -40,22 +40,23 @@ export async function onRequestPost({ request, env }) {
       "image/jpeg": "jpg",
       "image/png": "png",
       "image/webp": "webp",
-      "image/avif": "avif"
+      "image/avif": "avif",
+      "image/gif": "gif"
     };
 
     if (!allowedTypes[file.type]) {
       return json({
         success: false,
-        error: "Only JPG, PNG, WEBP and AVIF images are allowed"
+        error: "Only JPG, JPEG, PNG, WEBP, AVIF and GIF images are allowed"
       }, 400);
     }
 
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 500 * 1024;
 
     if (file.size <= 0 || file.size > maxSize) {
       return json({
         success: false,
-        error: "Image must be smaller than 5 MB"
+        error: "Image size must be between 1 byte and 500 KB"
       }, 400);
     }
 
@@ -73,8 +74,9 @@ export async function onRequestPost({ request, env }) {
     return json({
       success: true,
       message: "Image uploaded successfully",
-      image_url: `/images/${filename}`,
-      filename
+      image_url: `/api/images/${filename}`,
+      filename,
+      size: file.size
     }, 201);
 
   } catch (error) {
