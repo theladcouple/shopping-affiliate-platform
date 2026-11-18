@@ -75,9 +75,11 @@ export async function onRequestGet({ request, env }) {
         break;
     }
 
-    const dateCondition = range === "all"
-      ? ""
-      date(datetime(created_at, '+5 hours', '+30 minutes')) AS day,
+    
+const dateCondition = range === "all"
+  ? ""
+  : " AND date(datetime(created_at, '+5 hours', '+30 minutes')) BETWEEN ? AND ?";
+
 
     const query = (sql) => {
       const statement = env.DB.prepare(sql);
