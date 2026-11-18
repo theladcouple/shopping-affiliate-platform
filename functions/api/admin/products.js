@@ -17,8 +17,10 @@ function validateProduct(body) {
     return "Product title is required";
   }
 
-  if (typeof body.slug !== "string" ||
-      !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(body.slug.trim())) {
+  if (
+    typeof body.slug !== "string" ||
+    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(body.slug.trim())
+  ) {
     return "Slug must contain lowercase letters, numbers and hyphens only";
   }
 
@@ -30,21 +32,22 @@ function validateProduct(body) {
     if (
       body[field] !== null &&
       body[field] !== undefined &&
-      (typeof body[field] !== "number" ||
-       !Number.isFinite(body[field]) ||
-       body[field] < 0)
+      body[field] !== "" &&
+      (
+        typeof body[field] !== "number" ||
+        !Number.isFinite(body[field]) ||
+        body[field] < 0
+      )
     ) {
       return `Invalid ${field}`;
     }
   }
 
   if (
-    body.category_id !== null &&
-    body.category_id !== undefined &&
-    (!Number.isInteger(Number(body.category_id)) ||
-     Number(body.category_id) <= 0)
+    !Number.isInteger(Number(body.category_id)) ||
+    Number(body.category_id) <= 0
   ) {
-    return "Invalid category";
+    return "Please select a category";
   }
 
   if (
@@ -65,6 +68,7 @@ function validateProduct(body) {
     if (value !== null && value !== undefined && value !== "") {
       try {
         const url = new URL(value);
+
         if (url.protocol !== "https:") {
           return `${field} must use HTTPS`;
         }
@@ -97,10 +101,7 @@ function productValues(body) {
     optionalText(body.image_url),
     optionalNumber(body.price),
     optionalNumber(body.original_price),
-    body.category_id === null || body.category_id === undefined ||
-      body.category_id === ""
-      ? null
-      : Number(body.category_id),
+    Number(body.category_id),
     optionalText(body.amazon_url),
     optionalText(body.flipkart_url),
     optionalText(body.meesho_url),
@@ -110,31 +111,32 @@ function productValues(body) {
 }
 
 async function checkCategory(env, categoryId) {
-  if (categoryId === null || categoryId === undefined || categoryId === "") {
-    return true;
-  }
-
-  const category = await env.DB.prepare(
-    "SELECT id FROM categories WHERE id = ?"
-  ).bind(Number(categoryId)).first();
-
-  return Boolean(category);
+  return await env.DB.prepare(`
+    SELECT id, name, code
+    FROM categories
+    WHERE id = ? AND is_active = 1
+  `).bind(Number(categoryId)).first();
 }
 
 export async function onRequestGet({ request, env }) {
   const auth = await requireAdmin(request, env);
 
   if (!auth.authorized) {
-    return json({ success: false, error: auth.error }, auth.status);
+    return json(
+      { success: false, error: auth.error },
+      auth.status
+    );
   }
 
   try {
     const result = await env.DB.prepare(`
       SELECT
         p.*,
-        c.name AS category_name
+        c.name AS category_name,
+        c.code AS category_code
       FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN categories c
+        ON p.category_id = c.id
       ORDER BY p.created_at DESC
     `).all();
 
@@ -145,7 +147,11 @@ export async function onRequestGet({ request, env }) {
 
   } catch (error) {
     console.error("ADMIN_PRODUCTS_GET_ERROR:", error);
-    return json({ success: false, error: "Unable to load products" }, 500);
+
+    return json({
+      success: false,
+      error: "Unable to load products"
+    }, 500);
   }
 }
 
@@ -153,47 +159,140 @@ export async function onRequestPost({ request, env }) {
   const auth = await requireAdmin(request, env);
 
   if (!auth.authorized) {
-    return json({ success: false, error: auth.error }, auth.status);
+    return json(
+      { success: false, error: auth.error },
+      auth.status
+    );
   }
 
   try {
     const body = await request.json();
+
     const validationError = validateProduct(body);
 
     if (validationError) {
-      return json({ success: false, error: validationError }, 400);
+      return json({
+        success: false,
+        error: validationError
+      }, 400);
     }
 
     const values = productValues(body);
 
-    if (!(await checkCategory(env, values[6]))) {
-      return json({ success: false, error: "Category not found" }, 400);
+    const category = await checkCategory(env, values[6]);
+
+    if (!category) {
+      return json({
+        success: false,
+        error: "Category not found or inactive"
+      }, 400);
     }
+
+    if (
+      typeof category.code !== "string" ||
+      !/^[A-Z0-9]{2,5}$/.test(category.code)
+    ) {
+      return json({
+        success: false,
+        error: "Category product code is missing or invalid"
+      }, 400);
+    }
+
+    // Generate category-wise Product Code automatically.
+    // The code is generated inside the INSERT statement.
 
     const result = await env.DB.prepare(`
       INSERT INTO products (
-        title, slug, description, image_url,
-        price, original_price, category_id,
-        amazon_url, flipkart_url, meesho_url,
-        is_featured, status
+        title,
+        slug,
+        description,
+        image_url,
+        price,
+        original_price,
+        category_id,
+        amazon_url,
+        flipkart_url,
+        meesho_url,
+        is_featured,
+        status,
+        product_code
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(...values).run();
+      SELECT
+        ?, ?, ?, ?, ?, ?,
+        c.id,
+        ?, ?, ?, ?, ?,
+        c.code || '-' || printf(
+          '%04d',
+          COALESCE(
+            (
+              SELECT MAX(
+                CAST(
+                  SUBSTR(
+                    p.product_code,
+                    LENGTH(c.code) + 2
+                  ) AS INTEGER
+                )
+              )
+              FROM products p
+              WHERE p.category_id = c.id
+                AND p.product_code LIKE c.code || '-%'
+            ),
+            0
+          ) + 1
+        )
+      FROM categories c
+      WHERE c.id = ?
+        AND c.is_active = 1
+    `).bind(
+      values[0],
+      values[1],
+      values[2],
+      values[3],
+      values[4],
+      values[5],
+      values[7],
+      values[8],
+      values[9],
+      values[10],
+      values[11],
+      values[6]
+    ).run();
+
+    if (!result.meta.changes) {
+      return json({
+        success: false,
+        error: "Unable to generate product code for this category"
+      }, 400);
+    }
+
+    const product = await env.DB.prepare(`
+      SELECT id, title, product_code
+      FROM products
+      WHERE id = ?
+    `).bind(result.meta.last_row_id).first();
 
     return json({
       success: true,
       message: "Product created successfully",
-      product_id: result.meta.last_row_id
+      product_id: result.meta.last_row_id,
+      product_code: product.product_code,
+      product
     }, 201);
 
   } catch (error) {
     console.error("ADMIN_PRODUCTS_POST_ERROR:", error);
 
     if (String(error.message).includes("UNIQUE")) {
-      return json({ success: false, error: "This product slug already exists" }, 409);
+      return json({
+        success: false,
+        error: "Duplicate product slug or product code"
+      }, 409);
     }
 
-    return json({ success: false, error: "Unable to create product" }, 500);
+    return json({
+      success: false,
+      error: "Unable to create product"
+    }, 500);
   }
 }
 
@@ -201,7 +300,10 @@ export async function onRequestPut({ request, env }) {
   const auth = await requireAdmin(request, env);
 
   if (!auth.authorized) {
-    return json({ success: false, error: auth.error }, auth.status);
+    return json(
+      { success: false, error: auth.error },
+      auth.status
+    );
   }
 
   try {
@@ -209,20 +311,34 @@ export async function onRequestPut({ request, env }) {
     const id = Number(body.id);
 
     if (!Number.isInteger(id) || id <= 0) {
-      return json({ success: false, error: "Valid product ID is required" }, 400);
+      return json({
+        success: false,
+        error: "Valid product ID is required"
+      }, 400);
     }
 
     const validationError = validateProduct(body);
 
     if (validationError) {
-      return json({ success: false, error: validationError }, 400);
+      return json({
+        success: false,
+        error: validationError
+      }, 400);
     }
 
     const values = productValues(body);
 
-    if (!(await checkCategory(env, values[6]))) {
-      return json({ success: false, error: "Category not found" }, 400);
+    const category = await checkCategory(env, values[6]);
+
+    if (!category) {
+      return json({
+        success: false,
+        error: "Category not found or inactive"
+      }, 400);
     }
+
+    // Product Code is intentionally not updated.
+    // Existing Product Code remains unchanged during editing.
 
     const result = await env.DB.prepare(`
       UPDATE products SET
@@ -243,22 +359,38 @@ export async function onRequestPut({ request, env }) {
     `).bind(...values, id).run();
 
     if (!result.meta.changes) {
-      return json({ success: false, error: "Product not found" }, 404);
+      return json({
+        success: false,
+        error: "Product not found"
+      }, 404);
     }
+
+    const product = await env.DB.prepare(`
+      SELECT id, title, product_code
+      FROM products
+      WHERE id = ?
+    `).bind(id).first();
 
     return json({
       success: true,
-      message: "Product updated successfully"
+      message: "Product updated successfully",
+      product
     });
 
   } catch (error) {
     console.error("ADMIN_PRODUCTS_PUT_ERROR:", error);
 
     if (String(error.message).includes("UNIQUE")) {
-      return json({ success: false, error: "This product slug already exists" }, 409);
+      return json({
+        success: false,
+        error: "This product slug already exists"
+      }, 409);
     }
 
-    return json({ success: false, error: "Unable to update product" }, 500);
+    return json({
+      success: false,
+      error: "Unable to update product"
+    }, 500);
   }
 }
 
@@ -266,7 +398,10 @@ export async function onRequestDelete({ request, env }) {
   const auth = await requireAdmin(request, env);
 
   if (!auth.authorized) {
-    return json({ success: false, error: auth.error }, auth.status);
+    return json(
+      { success: false, error: auth.error },
+      auth.status
+    );
   }
 
   try {
@@ -274,7 +409,10 @@ export async function onRequestDelete({ request, env }) {
     const id = Number(body.id);
 
     if (!Number.isInteger(id) || id <= 0) {
-      return json({ success: false, error: "Valid product ID is required" }, 400);
+      return json({
+        success: false,
+        error: "Valid product ID is required"
+      }, 400);
     }
 
     const result = await env.DB.prepare(
@@ -282,7 +420,10 @@ export async function onRequestDelete({ request, env }) {
     ).bind(id).run();
 
     if (!result.meta.changes) {
-      return json({ success: false, error: "Product not found" }, 404);
+      return json({
+        success: false,
+        error: "Product not found"
+      }, 404);
     }
 
     return json({
@@ -292,6 +433,10 @@ export async function onRequestDelete({ request, env }) {
 
   } catch (error) {
     console.error("ADMIN_PRODUCTS_DELETE_ERROR:", error);
-    return json({ success: false, error: "Unable to delete product" }, 500);
+
+    return json({
+      success: false,
+      error: "Unable to delete product"
+    }, 500);
   }
 }
