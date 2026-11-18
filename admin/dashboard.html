@@ -697,9 +697,7 @@
         defaultOption.textContent = "Select Category";
         select.append(defaultOption);
 
-        data.categories
-          .filter(category => Number(category.is_active) === 1)
-          .forEach(category => {
+                data.categories.forEach(category => {
             const option = document.createElement("option");
             option.value = category.id;
             option.textContent = category.name;
