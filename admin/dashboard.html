@@ -1325,6 +1325,9 @@ imageUploadStatus.textContent = "";
 
         event.preventDefault();
         showDashboardSection(sectionId);
+        if (sectionId === "analytics") {
+  loadAnalytics();
+}
         history.replaceState(null, "", "#" + sectionId);
       });
     });
