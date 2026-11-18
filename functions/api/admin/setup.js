@@ -84,9 +84,15 @@ export async function onRequestPost({ request, env }) {
       message: "Admin account created successfully"
     });
 
-  } catch (error) {
+   } catch (error) {
+    console.error("ADMIN_SETUP_ERROR:", error);
+
     return Response.json(
-      { success: false, error: "Admin setup failed" },
+      {
+        success: false,
+        error: error?.message || String(error),
+        errorName: error?.name || "UnknownError"
+      },
       { status: 500 }
     );
   }
