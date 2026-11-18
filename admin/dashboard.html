@@ -448,6 +448,23 @@
         <div class="welcome">
           <h2>📈 Website Analytics</h2>
           <p>Track visitors, product views and affiliate button clicks.</p>
+          
+<div style="margin-top:20px;margin-bottom:20px">
+  <label for="analyticsDateRange" style="display:block;margin-bottom:8px;font-weight:bold">
+    Select Date Range
+  </label>
+
+  <select id="analyticsDateRange"
+    style="padding:11px;width:220px;max-width:100%;border:1px solid #cbd5e1;border-radius:6px;background:white">
+
+    <option value="today">Today</option>
+    <option value="7days" selected>Last 7 Days</option>
+    <option value="30days">Last 30 Days</option>
+    <option value="all">All Time</option>
+
+  </select>
+</div>
+
           <button
   type="button"
   id="refreshAnalytics"
