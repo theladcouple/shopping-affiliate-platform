@@ -1261,6 +1261,52 @@ imageUploadStatus.textContent = "";
 
     loadAnalytics();
 
+    // SIDEBAR SECTION NAVIGATION
+
+    const navLinks = document.querySelectorAll(".nav-link");
+
+    const dashboardSections = [
+      "overview",
+      "products",
+      "categories",
+      "analytics"
+    ];
+
+    function showDashboardSection(sectionId) {
+      dashboardSections.forEach(id => {
+        const section = document.getElementById(id);
+
+        if (section) {
+          section.style.display = id === sectionId ? "block" : "none";
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.toggle(
+          "active",
+          link.getAttribute("href") === "#" + sectionId
+        );
+      });
+    }
+
+    navLinks.forEach(link => {
+      link.addEventListener("click", event => {
+        const sectionId = link.getAttribute("href").replace("#", "");
+
+        if (!dashboardSections.includes(sectionId)) return;
+
+        event.preventDefault();
+        showDashboardSection(sectionId);
+        history.replaceState(null, "", "#" + sectionId);
+      });
+    });
+
+    const initialSection = dashboardSections.includes(
+      window.location.hash.replace("#", "")
+    ) ? window.location.hash.replace("#", "") : "overview";
+
+    showDashboardSection(initialSection);
+
 
   </script>
     </body>
