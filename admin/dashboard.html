@@ -448,6 +448,17 @@
         <div class="welcome">
           <h2>📈 Website Analytics</h2>
           <p>Track visitors, product views and affiliate button clicks.</p>
+          <button
+  type="button"
+  id="refreshAnalytics"
+  style="margin-top:15px;padding:11px 18px;background:#2563eb;color:white;border:0;border-radius:6px;cursor:pointer"
+>
+  🔄 Refresh Analytics
+</button>
+
+<p id="analyticsUpdated" style="margin-top:10px;color:#64748b;font-size:13px">
+  Analytics not refreshed yet.
+</p>
         </div>
 
         <div class="cards">
@@ -1265,6 +1276,18 @@ imageUploadStatus.textContent = "";
     }
 
     loadAnalytics();
+    document.getElementById("refreshAnalytics").addEventListener("click", async function () {
+  this.disabled = true;
+  this.textContent = "Refreshing...";
+
+  await loadAnalytics();
+
+  document.getElementById("analyticsUpdated").textContent =
+    "Last updated: " + new Date().toLocaleString("en-IN");
+
+  this.disabled = false;
+  this.textContent = "🔄 Refresh Analytics";
+});
 
     // SIDEBAR SECTION NAVIGATION
 
