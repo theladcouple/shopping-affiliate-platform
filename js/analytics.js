@@ -65,6 +65,52 @@
   // Website page visit
   track("page_view");
 
+  // Product View Tracking
+  const viewedProducts = new WeakSet();
+
+  const productObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting || entry.intersectionRatio < 0.5) {
+        return;
+      }
+
+      const productCard = entry.target;
+
+      if (viewedProducts.has(productCard)) return;
+
+      viewedProducts.add(productCard);
+
+      track("product_view", {
+        product_id: Number(productCard.dataset.productId) || null,
+        product_title: productCard.dataset.productTitle || null
+      });
+
+      productObserver.unobserve(productCard);
+    });
+  }, {
+    threshold: 0.5
+  });
+
+  function observeProductCards() {
+    document.querySelectorAll(".product-card").forEach(card => {
+      if (!viewedProducts.has(card)) {
+        productObserver.observe(card);
+      }
+    });
+  }
+
+  // Observe products loaded dynamically
+  const productMutationObserver = new MutationObserver(() => {
+    observeProductCards();
+  });
+
+  productMutationObserver.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  observeProductCards();
+
   // Buy Now button click
   document.addEventListener("click", function (event) {
     const button = event.target.closest(".platform-btn");
