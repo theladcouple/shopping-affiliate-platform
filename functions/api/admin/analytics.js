@@ -77,7 +77,7 @@ export async function onRequestGet({ request, env }) {
 
     const dateCondition = range === "all"
       ? ""
-      : " AND date(datetime(created_at, '+5 hours 30 minutes')) BETWEEN ? AND ?";
+      date(datetime(created_at, '+5 hours', '+30 minutes')) AS day,
 
     const query = (sql) => {
       const statement = env.DB.prepare(sql);
@@ -174,12 +174,12 @@ export async function onRequestGet({ request, env }) {
       dailyStart = shiftDate(today, -29);
       dailyEnd = today;
       dailyCondition =
-        " AND date(datetime(created_at, '+5 hours 30 minutes')) BETWEEN ? AND ?";
+        " AND date(datetime(created_at, '+5 hours', '+30 minutes')) BETWEEN ? AND ?";
     }
 
     const dailyQuery = env.DB.prepare(`
       SELECT
-        date(datetime(created_at, '+5 hours 30 minutes')) AS day,
+        date(datetime(created_at, '+5 hours', '+30 minutes')) AS day,
         COUNT(DISTINCT CASE
           WHEN event_type = 'page_view' THEN visitor_id
         END) AS visitors,
