@@ -7,6 +7,7 @@ export async function onRequestGet({ env }) {
         p.title,
         p.slug,
         p.description,
+        p.category_id,
         p.image_url,
         p.price,
         p.original_price,
