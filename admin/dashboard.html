@@ -850,9 +850,30 @@ document.getElementById("draftProducts").textContent =
           item.style.cssText =
             "padding:15px 0;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap";
 
-       const details = document.createElement("div"); 
+       
+const details = document.createElement("div");
+
+// PRODUCT IMAGE
+const image = document.createElement("img");
+
+image.src = product.image_url || "";
+image.alt = product.title || "Product Image";
+
+image.style.cssText =
+  "width:90px;height:90px;object-fit:contain;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;background:white;";
+
+if (product.image_url) {
+  image.onerror = () => {
+    image.style.display = "none";
+  };
+
+  details.append(image);
+}
+
+// PRODUCT NAME
 const name = document.createElement("strong");
 name.textContent = product.title;
+
 
 const code = document.createElement("p");
 code.style.cssText =
