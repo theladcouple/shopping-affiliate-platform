@@ -1179,6 +1179,88 @@ imageUploadStatus.textContent = "";
     loadProductCategories();
     loadProducts();
 
+    // ANALYTICS DATA
+
+    async function loadAnalytics() {
+      try {
+        const response = await fetch("/api/admin/analytics", {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Unable to load analytics");
+        }
+
+        const analytics = data.analytics;
+
+        document.getElementById("analyticsVisitors").textContent =
+          analytics.total_visitors ?? 0;
+
+        document.getElementById("analyticsPageViews").textContent =
+          analytics.total_page_views ?? 0;
+
+        document.getElementById("analyticsProductViews").textContent =
+          analytics.total_product_views ?? 0;
+
+        document.getElementById("analyticsBuyClicks").textContent =
+          analytics.total_buy_clicks ?? 0;
+
+        const platforms = document.getElementById("analyticsPlatforms");
+        platforms.replaceChildren();
+
+        if (!analytics.platforms.length) {
+          platforms.textContent = "No affiliate clicks yet.";
+        } else {
+          analytics.platforms.forEach(item => {
+            const row = document.createElement("p");
+            row.style.cssText = "padding:10px 0;border-bottom:1px solid #e2e8f0";
+            row.textContent = item.platform + ": " + item.clicks + " clicks";
+            platforms.append(row);
+          });
+        }
+
+        const sources = document.getElementById("analyticsSources");
+        sources.replaceChildren();
+
+        if (!analytics.traffic_sources.length) {
+          sources.textContent = "No traffic data yet.";
+        } else {
+          analytics.traffic_sources.forEach(item => {
+            const row = document.createElement("p");
+            row.style.cssText = "padding:10px 0;border-bottom:1px solid #e2e8f0";
+            row.textContent = item.source + ": " + item.visits + " visits";
+            sources.append(row);
+          });
+        }
+
+        const products = document.getElementById("analyticsTopProducts");
+        products.replaceChildren();
+
+        if (!analytics.top_products.length) {
+          products.textContent = "No product views yet.";
+        } else {
+          analytics.top_products.forEach(item => {
+            const row = document.createElement("p");
+            row.style.cssText = "padding:10px 0;border-bottom:1px solid #e2e8f0";
+            row.textContent =
+              item.product_title + ": " + item.views + " views";
+            products.append(row);
+          });
+        }
+
+      } catch (error) {
+        document.getElementById("analyticsPlatforms").textContent = error.message;
+        document.getElementById("analyticsSources").textContent = "Unable to load data.";
+        document.getElementById("analyticsTopProducts").textContent = "Unable to load data.";
+      }
+    }
+
+    loadAnalytics();
+
 
   </script>
     </body>
