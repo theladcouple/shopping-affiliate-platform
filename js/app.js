@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "mobiles-accessories": "📱",
       fashion: "👗",
       "home-kitchen": "🏠",
-      beauty: "💄",
+            "beauty-personal-care": "💄",
       "health-fitness": "💪",
       "sports-outdoors": "⚽",
       "grocery-daily-needs": "🛒",
@@ -67,9 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }
   }
-
-  function renderProducts(products) {
-    function filterByCategory(categoryId) {
+function filterByCategory(categoryId) {
   const filtered = allProducts.filter(product =>
     Number(product.category_id) === Number(categoryId)
   );
@@ -78,7 +76,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   productSection.scrollIntoView({ behavior: "smooth" });
 }
+
+function renderProducts(products) {
+   
     if (!products.length) {
+    productContainer.className = "empty-products";
       productContainer.innerHTML = `
         <span>🛒</span>
         <h3>Products Coming Soon</h3>
