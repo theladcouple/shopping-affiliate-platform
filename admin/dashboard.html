@@ -274,8 +274,7 @@
           </div>
         </div>
       </section>
-      <section class="content" id="categories">
-<section class="content" id="products">
+     <section class="content" id="products">
         <div class="welcome">
           <h2>Product Management</h2>
           <p>Add, edit and manage affiliate products.</p>
@@ -361,7 +360,7 @@
           <div id="productList">Loading products...</div>
         </div>
       </section>
-
+<section class="content" id="categories">
         <div class="welcome">
           <h2>Category Management</h2>
           <p>Add and manage your website categories.</p>
@@ -499,8 +498,9 @@
             "padding:15px 0;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap";
 
           const details = document.createElement("div");
-          const name = document.createElement("strong");
-          name.textContent = category.name;
+
+const name = document.createElement("strong");
+name.textContent = category.name;
 
           const slug = document.createElement("p");
           slug.textContent = category.slug;
@@ -731,13 +731,11 @@
           item.style.cssText =
             "padding:15px 0;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap";
 
-          const details = document.createElement("div");
+       const details = document.createElement("div"); 
+const name = document.createElement("strong");
+name.textContent = product.title;
 
-          const name = document.createElement("strong");
-          name.textContent = product.title;
-
-          const info = document.createElement("p");
-          const code = document.createElement("p");
+const code = document.createElement("p");
 code.style.cssText =
   "color:#1d4ed8;font-weight:bold;margin-top:7px;font-size:14px";
 
