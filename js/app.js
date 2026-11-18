@@ -98,19 +98,19 @@ const platforms = [
   {
     name: "Amazon",
     icon: "🛒",
-    url: (product.amazon_url || "").trim(),
+    url: String(product.amazon_url || "").trim(),
     className: "amazon"
   },
   {
     name: "Flipkart",
     icon: "🛍️",
-    url: (product.flipkart_url || "").trim(),
+    url: String(product.flipkart_url || "").trim(),
     className: "flipkart"
   },
   {
     name: "Meesho",
     icon: "💗",
-    url: (product.meesho_url || "").trim(),
+    url: String(product.meesho_url || "").trim(),
     className: "meesho"
   }
 ];
