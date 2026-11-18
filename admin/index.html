@@ -149,9 +149,14 @@
         throw new Error(data.error || "Login failed");
       }
 
-      message.style.color = "green";
-      message.textContent = "Login successful! Your secure session is created.";
+            message.style.color = "green";
+      message.textContent = "Login successful! Redirecting to dashboard...";
 
+      form.reset();
+
+      setTimeout(() => {
+        window.location.href = "/admin/dashboard.html";
+      }, 500);
       form.reset();
 
     } catch (error) {
