@@ -422,4 +422,45 @@ a {
     font-size: 14px;
   }
 }
+/* SHOPPING PLATFORM BUTTONS */
 
+.platform-links {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.platform-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  transition: 0.2s ease;
+}
+
+.platform-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* AMAZON */
+.platform-btn.amazon {
+  background: #232f3e;
+}
+
+/* FLIPKART */
+.platform-btn.flipkart {
+  background: #2874f0;
+}
+
+/* MEESHO */
+.platform-btn.meesho {
+  background: #9f2089;
+}
