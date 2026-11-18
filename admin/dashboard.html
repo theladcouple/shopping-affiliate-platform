@@ -274,7 +274,55 @@
           </div>
         </div>
       </section>
+      
+      <section class="content" id="categories">
+        <div class="welcome">
+          <h2>Category Management</h2>
+          <p>Add and manage your website categories.</p>
+        </div>
+
+        <div class="panel">
+          <h3>Add New Category</h3>
+
+          <form id="categoryForm">
+            <p>Category Name</p>
+            <input id="categoryName" required
+              placeholder="Example: Electronics">
+
+            <p style="margin-top:12px">Category Slug</p>
+            <input id="categorySlug" required
+              placeholder="electronics"
+              pattern="[a-z0-9]+(-[a-z0-9]+)*">
+
+            <p style="margin-top:12px">Description</p>
+            <textarea id="categoryDescription"
+              placeholder="Category description"></textarea>
+
+            <p style="margin-top:12px">Image URL</p>
+            <input id="categoryImage" type="url"
+              placeholder="https://example.com/image.jpg">
+
+            <p style="margin-top:12px">Sort Order</p>
+            <input id="categoryOrder" type="number" min="0" value="0">
+
+            <button type="submit"
+              style="margin-top:18px;padding:12px 20px;background:#2563eb;color:white;border:0;border-radius:6px;cursor:pointer">
+              Add Category
+            </button>
+
+            <p id="categoryMessage" style="margin-top:12px"></p>
+          </form>
+        </div>
+
+       
+        <div class="panel" style="margin-top:25px">
+          <h3>All Categories</h3>
+          <div id="categoryList">Loading categories...</div>
+        </div>
+      </section>
+
     </main>
+
 
   </div>
 
@@ -334,6 +382,202 @@
     );
 
     checkAdminSession();
+    
+    const categoryForm = document.getElementById("categoryForm");
+
+    async function loadCategories() {
+      const list = document.getElementById("categoryList");
+
+      try {
+        const response = await fetch("/api/admin/categories", {
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Unable to load categories");
+        }
+
+        list.replaceChildren();
+
+        if (data.categories.length === 0) {
+          list.textContent = "No categories added yet.";
+          return;
+        }
+
+        data.categories.forEach(category => {
+          const item = document.createElement("div");
+          item.style.cssText =
+            "padding:15px 0;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap";
+
+          const details = document.createElement("div");
+          const name = document.createElement("strong");
+          name.textContent = category.name;
+
+          const slug = document.createElement("p");
+          slug.textContent = category.slug;
+          slug.style.color = "#64748b";
+
+          details.append(name, slug);
+
+          const actions = document.createElement("div");
+
+          const edit = document.createElement("button");
+          edit.textContent = "Edit";
+          edit.style.cssText =
+            "padding:8px 12px;margin-right:8px;cursor:pointer";
+
+          edit.onclick = async () => {
+            const nameValue = prompt("Category name:", category.name);
+            if (nameValue === null) return;
+
+            const slugValue = prompt("Category slug:", category.slug);
+            if (slugValue === null) return;
+
+            const description = prompt(
+              "Description:",
+              category.description || ""
+            );
+            if (description === null) return;
+
+            const image = prompt(
+              "Image URL:",
+              category.image_url || ""
+            );
+            if (image === null) return;
+
+            const order = prompt(
+              "Sort order:",
+              String(category.sort_order)
+            );
+            if (order === null) return;
+
+            try {
+              const result = await fetch("/api/admin/categories", {
+                method: "PUT",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  id: category.id,
+                  name: nameValue,
+                  slug: slugValue,
+                  description,
+                  image_url: image,
+                  is_active: category.is_active,
+                  sort_order: Number(order)
+                })
+              });
+
+              const resultData = await result.json();
+
+              if (!result.ok || !resultData.success) {
+                throw new Error(resultData.error || "Update failed");
+              }
+
+              alert("Category updated successfully.");
+              loadCategories();
+
+            } catch (error) {
+              alert(error.message);
+            }
+          };
+
+          const remove = document.createElement("button");
+          remove.textContent = "Delete";
+          remove.style.cssText =
+            "padding:8px 12px;background:#dc2626;color:white;border:0;border-radius:5px;cursor:pointer";
+
+          remove.onclick = async () => {
+            if (!confirm("Delete this category?")) return;
+
+            try {
+              const result = await fetch("/api/admin/categories", {
+                method: "DELETE",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: category.id })
+              });
+
+              const resultData = await result.json();
+
+              if (!result.ok || !resultData.success) {
+                throw new Error(resultData.error || "Delete failed");
+              }
+
+              alert("Category deleted successfully.");
+              loadCategories();
+
+            } catch (error) {
+              alert(error.message);
+            }
+          };
+
+          actions.append(edit, remove);
+          item.append(details, actions);
+          list.append(item);
+        });
+
+      } catch (error) {
+        list.textContent = error.message;
+      }
+    }
+
+    categoryForm.addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const message = document.getElementById("categoryMessage");
+      const button = categoryForm.querySelector("button[type='submit']");
+      button.disabled = true;
+      message.textContent = "Saving category...";
+
+      try {
+        const response = await fetch("/api/admin/categories", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: document.getElementById("categoryName").value.trim(),
+            slug: document.getElementById("categorySlug").value.trim(),
+            description: document.getElementById("categoryDescription").value.trim(),
+            image_url: document.getElementById("categoryImage").value.trim(),
+            is_active: 1,
+            sort_order: Number(document.getElementById("categoryOrder").value)
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Unable to add category");
+        }
+
+        message.textContent = "Category added successfully!";
+        message.style.color = "green";
+        categoryForm.reset();
+        document.getElementById("categoryOrder").value = 0;
+        loadCategories();
+
+      } catch (error) {
+        message.textContent = error.message;
+        message.style.color = "red";
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    document.getElementById("categoryName").addEventListener("input", event => {
+      document.getElementById("categorySlug").value =
+        event.target.value
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
+    });
+
+    loadCategories();
+
   </script>
 </body>
 </html>
