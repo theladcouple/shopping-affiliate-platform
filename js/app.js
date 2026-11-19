@@ -7,6 +7,108 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let allProducts = [];
 
+  async function loadSiteSettings() {
+    try {
+      const response = await fetch("/api/settings");
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error("Settings could not load");
+      }
+
+      const settings = data.settings;
+      const siteName = settings.site_name || "The Lad Couple";
+
+      // Update browser tab title
+      document.title = settings.seo_title || siteName;
+
+      // Update SEO description
+      const metaDescription = document.querySelector(
+        'meta[name="description"]'
+      );
+
+      if (metaDescription && settings.seo_description) {
+        metaDescription.content = settings.seo_description;
+      }
+
+      // Update Header and Footer logos
+      function updateLogo(id) {
+        const element = document.getElementById(id);
+
+        if (!element) return;
+
+        element.replaceChildren();
+
+        if (settings.logo_url) {
+          const img = document.createElement("img");
+
+          img.src = settings.logo_url;
+          img.alt = siteName + " Logo";
+          img.style.maxHeight = "45px";
+          img.style.maxWidth = "160px";
+          img.style.objectFit = "contain";
+
+          element.appendChild(img);
+        } else {
+          element.textContent = siteName;
+        }
+      }
+
+      updateLogo("siteLogoHeader");
+      updateLogo("siteLogoFooter");
+
+      // Update Contact Information
+      const contact = document.getElementById("siteContactInfo");
+
+      if (contact) {
+        contact.replaceChildren();
+
+        if (settings.contact_email) {
+          const email = document.createElement("a");
+          email.href = "mailto:" + settings.contact_email;
+          email.textContent = settings.contact_email;
+          contact.appendChild(email);
+        }
+
+        if (settings.contact_phone) {
+          const phone = document.createElement("a");
+          phone.href = "tel:" + settings.contact_phone;
+          phone.textContent = settings.contact_phone;
+          contact.appendChild(phone);
+        }
+      }
+
+      // Update Social Media Links
+      const social = document.getElementById("siteSocialLinks");
+
+      if (social) {
+        social.replaceChildren();
+
+        const links = [
+          ["Instagram", settings.instagram_url],
+          ["Facebook", settings.facebook_url],
+          ["YouTube", settings.youtube_url]
+        ];
+
+        links.forEach(([name, url]) => {
+          if (!url) return;
+
+          const link = document.createElement("a");
+
+          link.href = url;
+          link.textContent = name;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+
+          social.appendChild(link);
+        });
+      }
+
+    } catch (error) {
+      console.error("SITE_SETTINGS_ERROR:", error);
+    }
+  }
+
  
     async function loadCategories() {
   const categoryGrid = document.getElementById("categoryGrid");
@@ -196,6 +298,7 @@ const platforms = [
 
     filterByCategory(categoryLink.dataset.categoryId);
   });
+  loadSiteSettings();
 loadCategories();
-  loadProducts();
+    loadProducts();
 });
