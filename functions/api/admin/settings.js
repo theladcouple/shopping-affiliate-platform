@@ -28,8 +28,11 @@ function emptySettings() {
 }
 
 export async function onRequestGet({ request, env }) {
-  const auth = await requireAdmin({ request, env });
-  if (auth) return auth;
+  const auth = await requireAdmin(request, env);
+
+  if (!auth.authorized) {
+    return json({ success: false, message: auth.error }, auth.status);
+  }
 
   try {
     const result = await env.DB.prepare(
@@ -46,13 +49,17 @@ export async function onRequestGet({ request, env }) {
 
     return json({ success: true, settings });
   } catch (error) {
+    console.error("SETTINGS_GET_ERROR:", error);
     return json({ success: false, message: "Could not load settings." }, 500);
   }
 }
 
 export async function onRequestPut({ request, env }) {
-  const auth = await requireAdmin({ request, env });
-  if (auth) return auth;
+  const auth = await requireAdmin(request, env);
+
+  if (!auth.authorized) {
+    return json({ success: false, message: auth.error }, auth.status);
+  }
 
   try {
     const body = await request.json();
@@ -133,6 +140,7 @@ export async function onRequestPut({ request, env }) {
       message: "Settings saved successfully."
     });
   } catch (error) {
+    console.error("SETTINGS_SAVE_ERROR:", error);
     return json({ success: false, message: "Could not save settings." }, 500);
   }
 }
