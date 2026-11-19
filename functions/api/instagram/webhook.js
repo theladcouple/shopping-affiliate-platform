@@ -1,5 +1,10 @@
 
 async function verifySignature(request, rawBody, appSecret) {
+  if (!appSecret) {
+    console.error("INSTAGRAM_APP_SECRET is missing");
+    return false;
+  }
+
   const signature = request.headers.get("x-hub-signature-256");
 
   if (!signature || !signature.startsWith("sha256=")) {
@@ -23,43 +28,59 @@ async function verifySignature(request, rawBody, appSecret) {
   );
 
   const expected = Array.from(new Uint8Array(signed))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .map(byte => byte.toString(16).padStart(2, "0"))
     .join("");
 
   return signature.slice(7) === expected;
 }
 
 async function sendInstagramMessage(env, recipientId, message) {
-  const token = env.INSTAGRAM_PAGE_ACCESS_TOKEN;
+  const token = env.INSTAGRAM_ACCESS_TOKEN;
+  const igUserId = env.INSTAGRAM_IG_USER_ID;
 
-  if (!token) {
-    console.error("INSTAGRAM_PAGE_ACCESS_TOKEN is missing");
+  if (!token || !igUserId) {
+    console.error("Instagram token or IG User ID is missing");
     return;
   }
 
-  const response = await fetch(
-    "https://graph.facebook.com/v27.0/me/messages",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
+  const url =
+    `https://graph.facebook.com/v27.0/${igUserId}/messages` +
+    `?access_token=${encodeURIComponent(token)}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      recipient: {
+        id: recipientId
       },
-      body: JSON.stringify({
-        recipient: { id: recipientId },
-        message: { text: message }
-      }) + `&access_token=${encodeURIComponent(token)}`
-    }
-  );
+      message: {
+        text: message
+      }
+    })
+  });
 
   const result = await response.json();
 
   if (!response.ok) {
-    console.error("Instagram message error:", result);
+    console.error("Instagram Send API Error:", result);
+    throw new Error(
+      `Instagram API failed: ${JSON.stringify(result)}`
+    );
   }
+
+  console.log("Instagram message sent:", result);
+  return result;
 }
 
 async function handleInstagramMessage(env, senderId, text) {
   const code = text.trim().replace(/^#/, "");
+
+  if (!code) {
+    return;
+  }
 
   const productResult = await env.DB.prepare(`
     SELECT id, title, slug, price
@@ -86,9 +107,9 @@ async function handleInstagramMessage(env, senderId, text) {
       `आमची वेबसाइट: https://theladcouple.pages.dev/`;
   } else {
     reply =
-      "नमस्कार! ❤️ प्रॉडक्ट कोड सापडला नाही. " +
+      "नमस्कार! ❤️ प्रॉडक्ट कोड सापडला नाही.\n\n" +
       "कृपया योग्य प्रॉडक्ट कोड पाठवा.\n\n" +
-      "वेबसाइट: https://theladcouple.pages.dev/";
+      "आमची वेबसाइट: https://theladcouple.pages.dev/";
   }
 
   await sendInstagramMessage(env, senderId, reply);
@@ -109,7 +130,9 @@ export async function onRequestGet({ request, env }) {
     return new Response(challenge, { status: 200 });
   }
 
-  return new Response("Verification failed", { status: 403 });
+  return new Response("Verification failed", {
+    status: 403
+  });
 }
 
 export async function onRequestPost({ request, env }) {
@@ -122,7 +145,11 @@ export async function onRequestPost({ request, env }) {
   );
 
   if (!valid) {
-    return new Response("Invalid signature", { status: 401 });
+    console.error("Webhook signature verification failed");
+
+    return new Response("Invalid signature", {
+      status: 401
+    });
   }
 
   let body;
@@ -130,29 +157,33 @@ export async function onRequestPost({ request, env }) {
   try {
     body = JSON.parse(rawBody);
   } catch {
-    return new Response("Invalid JSON", { status: 400 });
+    return new Response("Invalid JSON", {
+      status: 400
+    });
   }
 
   if (body.object !== "instagram") {
-    return new Response("EVENT_RECEIVED", { status: 200 });
+    return new Response("EVENT_RECEIVED", {
+      status: 200
+    });
   }
 
   for (const entry of body.entry || []) {
     const events = [
       ...(entry.messaging || []),
       ...(entry.changes || [])
-        .filter((change) => change.field === "messages")
-        .map((change) => change.value)
+        .filter(change => change.field === "messages")
+        .map(change => change.value)
     ];
 
     for (const event of events) {
       const senderId = event.sender?.id;
       const message = event.message;
-      const text = message?.text;
+      const messageText = message?.text;
 
       if (
         !senderId ||
-        !text ||
+        !messageText ||
         message?.is_echo ||
         message?.is_self
       ) {
@@ -160,13 +191,23 @@ export async function onRequestPost({ request, env }) {
       }
 
       try {
-        await handleInstagramMessage(env, senderId, text);
+        console.log("Instagram message received:", messageText);
+
+        await handleInstagramMessage(
+          env,
+          senderId,
+          messageText
+        );
       } catch (error) {
-        console.error("Instagram webhook processing error:", error);
+        console.error(
+          "Instagram webhook processing error:",
+          error
+        );
       }
     }
   }
 
-  return new Response("EVENT_RECEIVED", { status: 200 });
+  return new Response("EVENT_RECEIVED", {
+    status: 200
+  });
 }
-
