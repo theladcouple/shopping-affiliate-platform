@@ -1283,12 +1283,17 @@ function renderAnalyticsChart(dailyTrends) {
           tension: 0.3
         },
         {
-          label: "Buy Clicks",
-          data: dailyTrends.map(item => item.buy_clicks ?? 0),
-          borderColor: "#ea580c",
-          backgroundColor: "#ea580c",
-          tension: 0.3
-        }
+  label: "Buy Clicks",
+  data: dailyTrends.map(item => item.buy_clicks ?? 0),
+  borderColor: "#ea580c",
+  backgroundColor: "#ea580c",
+  borderWidth: 3,
+  pointRadius: 5,
+  pointHoverRadius: 8,
+  tension: 0.3,
+  fill: false,
+  spanGaps: true
+}
       ]
     },
 
