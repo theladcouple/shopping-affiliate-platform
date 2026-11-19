@@ -195,6 +195,7 @@ function filterByCategory(categoryId) {
 }
 
 
+
 function renderProducts(products) {
 
   if (!products.length) {
@@ -211,48 +212,50 @@ function renderProducts(products) {
 
   productContainer.innerHTML = products.map(product => {
 
-const platforms = [
-  {
-    name: "Amazon",
-    icon: "🛒",
-    url: String(product.amazon_url || "").trim(),
-    className: "amazon"
-  },
-  {
-    name: "Flipkart",
-    icon: "🛍️",
-    url: String(product.flipkart_url || "").trim(),
-    className: "flipkart"
-  },
-  {
-    name: "Meesho",
-    icon: "💗",
-    url: String(product.meesho_url || "").trim(),
-    className: "meesho"
-  }
-];
+    const platforms = [
+      {
+        name: "Amazon",
+        icon: "🛒",
+        url: String(product.amazon_url || "").trim(),
+        className: "amazon"
+      },
+      {
+        name: "Flipkart",
+        icon: "🛍️",
+        url: String(product.flipkart_url || "").trim(),
+        className: "flipkart"
+      },
+      {
+        name: "Meesho",
+        icon: "💗",
+        url: String(product.meesho_url || "").trim(),
+        className: "meesho"
+      }
+    ];
 
     const buyButtons = platforms
       .filter(platform => platform.url)
-.map(platform => `
-  <a class="platform-btn ${platform.className}"
-     href="${escapeHTML(platform.url)}"
-     target="_blank"
-     rel="noopener noreferrer">
-    <span>${platform.icon}</span>
-    ${platform.name} - Buy Now
-  </a>
-`).join("");
+      .map(platform => `
+        <a class="platform-btn ${platform.className}"
+           href="${escapeHTML(platform.url)}"
+           target="_blank"
+           rel="noopener noreferrer">
+          <span>${platform.icon}</span>
+          ${platform.name} - Buy Now
+        </a>
+      `).join("");
 
     return `
       <article class="product-card"
                data-product-id="${escapeHTML(product.id)}"
                data-product-title="${escapeHTML(product.title)}">
+
         <img src="${escapeHTML(product.image_url || "")}"
              alt="${escapeHTML(product.title)}"
              onerror="this.style.display='none'">
 
         <div class="product-info">
+
           <p class="product-category">
             ${escapeHTML(product.category_name || "Shopping")}
           </p>
@@ -265,14 +268,39 @@ const platforms = [
               : "Price unavailable"}
           </p>
 
+          <div style="
+            margin: 12px 0;
+            padding: 9px 12px;
+            background: #fff5f8;
+            border: 1px dashed #e7a4bb;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          ">
+            <span style="font-size: 13px; color: #666;">
+              Product Code
+            </span>
+
+            <strong style="
+              color: #b83268;
+              font-size: 14px;
+              letter-spacing: 1px;
+            ">
+              ${escapeHTML(product.product_code || "Not assigned")}
+            </strong>
+          </div>
+
           <div class="platform-links">
             ${buyButtons}
           </div>
+
         </div>
       </article>
     `;
   }).join("");
 }
+
   // PRODUCT DETAILS POPUP
 
   const productModal = document.getElementById("productModal");
@@ -382,7 +410,24 @@ const platforms = [
           <p class="product-price">
             ${escapeHTML(getProductPrice(product))}
           </p>
+<div style="
+  margin: 12px 0;
+  padding: 10px 12px;
+  background: #fff5f8;
+  border: 1px dashed #e7a4bb;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+">
+  <span style="font-size: 13px; color: #666;">
+    Product Code
+  </span>
 
+  <strong style="color: #b83268; letter-spacing: 1px;">
+    ${escapeHTML(product.product_code || "Not assigned")}
+  </strong>
+</div>
           ${
             product.description
               ? `<p class="modal-product-description">
