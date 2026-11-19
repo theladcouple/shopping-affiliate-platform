@@ -75,46 +75,46 @@ async function sendInstagramMessage(env, recipientId, message) {
   return result;
 }
 
+
 async function handleInstagramMessage(env, senderId, text) {
-  const code = text.trim().replace(/^#/, "");
+  const code = text.trim().replace(/^#/, "").toUpperCase();
 
-  if (!code) {
-    return;
-  }
+  if (!code) return;
 
-  const productResult = await env.DB.prepare(`
-    SELECT id, title, slug, price
+  const product = await env.DB.prepare(`
+    SELECT id, title, slug, product_code, price
     FROM products
     WHERE status = 'published'
-      AND (
-        LOWER(slug) = LOWER(?)
-        OR CAST(id AS TEXT) = ?
-      )
+      AND UPPER(product_code) = ?
     LIMIT 1
-  `).bind(code, code).first();
+  `).bind(code).first();
+
+  const homepage = "https://theladcouple.pages.dev/";
 
   let reply;
 
-  if (productResult) {
+  if (product) {
     const productUrl =
-      "https://theladcouple.pages.dev/?product=" +
-      encodeURIComponent(productResult.slug);
+      homepage + "?product=" + encodeURIComponent(product.slug);
 
     reply =
-      `नमस्कार! ❤️ तुमचा प्रॉडक्ट सापडला.\n\n` +
-      `${productResult.title}\n` +
-      `प्रॉडक्ट पाहण्यासाठी: ${productUrl}\n\n` +
-      `आमची वेबसाइट: https://theladcouple.pages.dev/`;
+      `✨ नमस्कार! ❤️ The Lad Couple मध्ये तुमचं स्वागत आहे!\n\n` +
+      `तुम्ही शोधलेला Product आम्हाला सापडला! 🛍️\n\n` +
+      `💖 ${product.title}\n` +
+      `🏷️ Product Code: ${product.product_code}\n\n` +
+      `👇 इथे क्लिक करून Product पाहा:\n${productUrl}\n\n` +
+      `🌸 आमची संपूर्ण Shopping Website:\n${homepage}\n\n` +
+      `Thank you for shopping with The Lad Couple! ❤️`;
   } else {
     reply =
-      "नमस्कार! ❤️ प्रॉडक्ट कोड सापडला नाही.\n\n" +
-      "कृपया योग्य प्रॉडक्ट कोड पाठवा.\n\n" +
-      "आमची वेबसाइट: https://theladcouple.pages.dev/";
+      `हाय! ❤️ The Lad Couple ला संपर्क केल्याबद्दल धन्यवाद!\n\n` +
+      `तुम्ही पाठवलेला Product Code (${code}) सापडला नाही.\n\n` +
+      `कृपया Website वरून योग्य Product Code तपासून पुन्हा पाठवा. 🛍️\n\n` +
+      `🌸 ${homepage}`;
   }
 
   await sendInstagramMessage(env, senderId, reply);
 }
-
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
 
