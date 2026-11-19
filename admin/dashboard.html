@@ -442,6 +442,64 @@
         </div>
       </section>
 
+<section class="content" id="settings">
+  <h2>Site Settings</h2>
+  <p>Manage your website information and social media links.</p>
+
+  <form id="settingsForm">
+    <div class="form-group">
+      <label for="siteName">Website Name</label>
+      <input type="text" id="siteName" placeholder="The Lad Couple">
+    </div>
+
+    <div class="form-group">
+      <label for="siteLogoUrl">Logo URL (HTTPS)</label>
+      <input type="url" id="siteLogoUrl" placeholder="https://example.com/logo.png">
+    </div>
+
+    <div class="form-group">
+      <label for="contactEmail">Contact Email</label>
+      <input type="email" id="contactEmail" placeholder="your@email.com">
+    </div>
+
+    <div class="form-group">
+      <label for="contactPhone">Contact Phone</label>
+      <input type="tel" id="contactPhone" placeholder="+91...">
+    </div>
+
+    <div class="form-group">
+      <label for="instagramUrl">Instagram URL</label>
+      <input type="url" id="instagramUrl" placeholder="https://instagram.com/...">
+    </div>
+
+    <div class="form-group">
+      <label for="facebookUrl">Facebook URL</label>
+      <input type="url" id="facebookUrl" placeholder="https://facebook.com/...">
+    </div>
+
+    <div class="form-group">
+      <label for="youtubeUrl">YouTube URL</label>
+      <input type="url" id="youtubeUrl" placeholder="https://youtube.com/...">
+    </div>
+
+    <div class="form-group">
+      <label for="seoTitle">SEO Title</label>
+      <input type="text" id="seoTitle" placeholder="The Lad Couple - Shopping">
+    </div>
+
+    <div class="form-group">
+      <label for="seoDescription">SEO Description</label>
+      <textarea id="seoDescription" rows="4" placeholder="Describe your website..."></textarea>
+    </div>
+
+    <p id="settingsMessage" role="status"></p>
+
+    <button type="submit" id="saveSettingsButton">
+      Save Settings
+    </button>
+  </form>
+</section>
+
       
 <!-- ANALYTICS SECTION -->
 <section class="content" id="analytics">
@@ -1520,11 +1578,12 @@ loadAnalytics();
     const navLinks = document.querySelectorAll(".nav-link");
 
     const dashboardSections = [
-      "overview",
-      "products",
-      "categories",
-      "analytics"
-    ];
+  "overview",
+  "products",
+  "categories",
+  "settings",
+  "analytics"
+];
 
     function showDashboardSection(sectionId) {
       dashboardSections.forEach(id => {
@@ -1563,6 +1622,83 @@ loadAnalytics();
     ) ? window.location.hash.replace("#", "") : "overview";
 
     showDashboardSection(initialSection);
+
+async function loadAdminSettings() {
+  const message = document.getElementById("settingsMessage");
+
+  try {
+    const response = await fetch("/api/admin/settings");
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Could not load settings.");
+    }
+
+    const s = data.settings;
+
+    document.getElementById("siteName").value = s.site_name || "";
+    document.getElementById("siteLogoUrl").value = s.logo_url || "";
+    document.getElementById("contactEmail").value = s.contact_email || "";
+    document.getElementById("contactPhone").value = s.contact_phone || "";
+    document.getElementById("instagramUrl").value = s.instagram_url || "";
+    document.getElementById("facebookUrl").value = s.facebook_url || "";
+    document.getElementById("youtubeUrl").value = s.youtube_url || "";
+    document.getElementById("seoTitle").value = s.seo_title || "";
+    document.getElementById("seoDescription").value = s.seo_description || "";
+
+    message.textContent = "Settings loaded successfully.";
+  } catch (error) {
+    message.textContent = error.message;
+  }
+}
+
+document.getElementById("settingsForm").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const button = document.getElementById("saveSettingsButton");
+  const message = document.getElementById("settingsMessage");
+
+  const settings = {
+    site_name: document.getElementById("siteName").value,
+    logo_url: document.getElementById("siteLogoUrl").value,
+    contact_email: document.getElementById("contactEmail").value,
+    contact_phone: document.getElementById("contactPhone").value,
+    instagram_url: document.getElementById("instagramUrl").value,
+    facebook_url: document.getElementById("facebookUrl").value,
+    youtube_url: document.getElementById("youtubeUrl").value,
+    seo_title: document.getElementById("seoTitle").value,
+    seo_description: document.getElementById("seoDescription").value
+  };
+
+  button.disabled = true;
+  button.textContent = "Saving...";
+  message.textContent = "";
+
+  try {
+    const response = await fetch("/api/admin/settings", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(settings)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Could not save settings.");
+    }
+
+    message.textContent = "Settings saved successfully!";
+  } catch (error) {
+    message.textContent = error.message;
+  } finally {
+    button.disabled = false;
+    button.textContent = "Save Settings";
+  }
+});
+
+loadAdminSettings();
 
 
   </script>
