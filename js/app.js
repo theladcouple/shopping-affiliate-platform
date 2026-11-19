@@ -277,7 +277,7 @@ const platforms = [
 
   const productModal = document.getElementById("productModal");
   const modalProductContent = document.getElementById("modalProductContent");
-
+  let activeModalProduct = null;
   function getProductPrice(product) {
     return product.price != null
       ? "₹" + Number(product.price).toLocaleString("en-IN")
@@ -327,7 +327,7 @@ const platforms = [
 
   function showProductModal(product) {
     if (!product || !productModal || !modalProductContent) return;
-
+    activeModalProduct = product;
     const platforms = getProductPlatforms(product);
 
     const buyButtons = platforms.map(platform => `
@@ -421,7 +421,101 @@ const platforms = [
     productModal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
   }
+  // BEFORE BUY SUGGESTION POPUP
 
+  const beforeBuyModal = document.getElementById("beforeBuyModal");
+  const beforeBuyProducts = document.getElementById("beforeBuyProducts");
+  const continueAffiliateLink = document.getElementById("continueAffiliateLink");
+
+  function showBeforeBuyPopup(product, platform) {
+    if (!beforeBuyModal || !beforeBuyProducts || !continueAffiliateLink) return;
+
+    // Original affiliate link
+    continueAffiliateLink.href = platform.url;
+    continueAffiliateLink.textContent = "Continue to " + platform.name;
+
+    // Automatically get related products
+    const relatedProducts = getRelatedProducts(product);
+
+    beforeBuyProducts.innerHTML = relatedProducts.length
+      ? relatedProducts.map(item => `
+          <article class="related-product-card"
+                   data-before-buy-product-id="${escapeHTML(item.id)}">
+
+            <img src="${escapeHTML(item.image_url || "")}"
+                 alt="${escapeHTML(item.title)}"
+                 onerror="this.style.display='none'">
+
+            <h4>${escapeHTML(item.title)}</h4>
+
+            <p>${escapeHTML(getProductPrice(item))}</p>
+
+          </article>
+        `).join("")
+      : "<p>No other products available right now.</p>";
+
+    beforeBuyModal.classList.add("is-open");
+    beforeBuyModal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeBeforeBuyPopup() {
+    if (!beforeBuyModal) return;
+
+    beforeBuyModal.classList.remove("is-open");
+    beforeBuyModal.setAttribute("aria-hidden", "true");
+  }
+
+  // Intercept Buy Now click
+  productModal.addEventListener("click", event => {
+    const buyButton = event.target.closest(".modal-buy-buttons .platform-btn");
+
+    if (!buyButton) return;
+
+    event.preventDefault();
+
+    if (!activeModalProduct) return;
+
+    let platformName = "";
+
+    if (buyButton.classList.contains("amazon")) {
+      platformName = "Amazon";
+    } else if (buyButton.classList.contains("flipkart")) {
+      platformName = "Flipkart";
+    } else if (buyButton.classList.contains("meesho")) {
+      platformName = "Meesho";
+    }
+
+    const platform = getProductPlatforms(activeModalProduct).find(item =>
+      item.name === platformName
+    );
+
+    if (platform) {
+      showBeforeBuyPopup(activeModalProduct, platform);
+    }
+  });
+
+  // Close the Before Buy popup
+  beforeBuyModal.addEventListener("click", event => {
+    if (event.target.closest("[data-close-before-buy]")) {
+      closeBeforeBuyPopup();
+    }
+  });
+
+  // Clicking a suggestion opens that product in the first popup
+  beforeBuyProducts.addEventListener("click", event => {
+    const card = event.target.closest("[data-before-buy-product-id]");
+
+    if (!card) return;
+
+    const product = allProducts.find(item =>
+      String(item.id) === String(card.dataset.beforeBuyProductId)
+    );
+
+    if (product) {
+      closeBeforeBuyPopup();
+      showProductModal(product);
+    }
+  });
   // Product card click opens popup.
   productContainer.addEventListener("click", event => {
     if (event.target.closest("a.platform-btn")) return;
@@ -463,7 +557,8 @@ const platforms = [
 
   // Close popup with Escape key.
   document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && productModal.classList.contains("is-open")) {
+    if (event.key === "Escape") {
+      closeBeforeBuyPopup();
       closeProductModal();
     }
   });
