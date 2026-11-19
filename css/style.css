@@ -504,7 +504,9 @@ a {
 .social-link.youtube {
   background: #ff0000;
 }
-
+.social-link.facebook {
+  background: #1877f2;
+}
 #siteSocialLinks {
   margin-top: 18px;
 }
