@@ -725,3 +725,80 @@ body.modal-open {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* BEFORE BUY POPUP */
+
+.before-buy-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.before-buy-modal.is-open {
+  display: flex;
+}
+
+.before-buy-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+}
+
+.before-buy-dialog {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 650px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 25px;
+}
+
+.before-buy-dialog h2 {
+  font-size: 23px;
+  margin: 12px 0;
+}
+
+.before-buy-dialog > p {
+  color: #666666;
+  margin-bottom: 20px;
+}
+
+.before-buy-close {
+  float: right;
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 50%;
+  background: #222222;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.continue-buy-btn {
+  display: block;
+  width: 100%;
+  margin-top: 22px;
+  padding: 15px;
+  border-radius: 9px;
+  background: #16a34a;
+  color: #ffffff;
+  text-align: center;
+  font-weight: 700;
+}
+
+.continue-buy-btn:hover {
+  background: #15803d;
+}
+
+@media (max-width: 600px) {
+  .before-buy-dialog {
+    padding: 17px;
+  }
+}
