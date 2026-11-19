@@ -516,9 +516,8 @@ const platforms = [
       showProductModal(product);
     }
   });
-  // Product card click opens popup.
+   // Product card and Buy Now click handling.
   productContainer.addEventListener("click", event => {
-    if (event.target.closest("a.platform-btn")) return;
 
     const card = event.target.closest(".product-card");
 
@@ -528,9 +527,37 @@ const platforms = [
       String(item.id) === String(card.dataset.productId)
     );
 
-    if (product) {
-      showProductModal(product);
+    if (!product) return;
+
+    // If customer clicks Buy Now on product card
+    const buyButton = event.target.closest("a.platform-btn");
+
+    if (buyButton) {
+      event.preventDefault();
+
+      let platformName = "";
+
+      if (buyButton.classList.contains("amazon")) {
+        platformName = "Amazon";
+      } else if (buyButton.classList.contains("flipkart")) {
+        platformName = "Flipkart";
+      } else if (buyButton.classList.contains("meesho")) {
+        platformName = "Meesho";
+      }
+
+      const platform = getProductPlatforms(product).find(item =>
+        item.name === platformName
+      );
+
+      if (platform) {
+        showBeforeBuyPopup(product, platform);
+      }
+
+      return;
     }
+
+    // Otherwise open product details popup
+    showProductModal(product);
   });
 
   // Related product click opens its details in the same popup.
