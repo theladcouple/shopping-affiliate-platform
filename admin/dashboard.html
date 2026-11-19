@@ -1233,6 +1233,7 @@ imageUploadStatus.textContent = "";
     loadProductCategories();
     loadProducts();
 
+
 // DAILY ANALYTICS CHART
 
 let analyticsChart = null;
@@ -1260,69 +1261,47 @@ function renderAnalyticsChart(dailyTrends) {
     data: {
       labels: labels,
 
-      
-datasets: [
-  {
-    label: "Visitors",
-    data: dailyTrends.map(item => item.visitors ?? 0),
-    borderColor: "#2563eb",
-    backgroundColor: "#2563eb",
-    borderWidth: 3,
-    pointRadius: 4,
-    pointHoverRadius: 7,
-    tension: 0.3,
-    fill: false,
-    spanGaps: true
-  },
-  {
-    label: "Page Views",
-    data: dailyTrends.map(item => item.page_views ?? 0),
-    borderColor: "#16a34a",
-    backgroundColor: "#16a34a",
-    borderWidth: 3,
-    pointRadius: 4,
-    pointHoverRadius: 7,
-    tension: 0.3,
-    fill: false,
-    spanGaps: true
-  },
-  {
-    label: "Product Views",
-    data: dailyTrends.map(item => item.product_views ?? 0),
-    borderColor: "#9333ea",
-    backgroundColor: "#9333ea",
-    borderWidth: 3,
-    pointRadius: 4,
-    pointHoverRadius: 7,
-    tension: 0.3,
-    fill: false,
-    spanGaps: true
-  },
-  {
-    label: "Buy Clicks",
-    data: dailyTrends.map(item => item.buy_clicks ?? 0),
-    borderColor: "#ea580c",
-    backgroundColor: "#ea580c",
-    borderWidth: 3,
-    pointRadius: 4,
-    pointHoverRadius: 7,
-    tension: 0.3,
-    fill: false,
-    spanGaps: true
-  }
-]
-
-  label: "Buy Clicks",
-  data: dailyTrends.map(item => item.buy_clicks ?? 0),
-  borderColor: "#ea580c",
-  backgroundColor: "#ea580c",
-  borderWidth: 3,
-  pointRadius: 5,
-  pointHoverRadius: 8,
-  tension: 0.3,
-  fill: false,
-  spanGaps: true
-}
+      datasets: [
+        {
+          label: "Visitors",
+          data: dailyTrends.map(item => item.visitors ?? 0),
+          borderColor: "#2563eb",
+          backgroundColor: "#2563eb",
+          borderWidth: 3,
+          pointRadius: 4,
+          tension: 0.3,
+          fill: false
+        },
+        {
+          label: "Page Views",
+          data: dailyTrends.map(item => item.page_views ?? 0),
+          borderColor: "#16a34a",
+          backgroundColor: "#16a34a",
+          borderWidth: 3,
+          pointRadius: 4,
+          tension: 0.3,
+          fill: false
+        },
+        {
+          label: "Product Views",
+          data: dailyTrends.map(item => item.product_views ?? 0),
+          borderColor: "#9333ea",
+          backgroundColor: "#9333ea",
+          borderWidth: 3,
+          pointRadius: 4,
+          tension: 0.3,
+          fill: false
+        },
+        {
+          label: "Buy Clicks",
+          data: dailyTrends.map(item => item.buy_clicks ?? 0),
+          borderColor: "#ea580c",
+          backgroundColor: "#ea580c",
+          borderWidth: 3,
+          pointRadius: 4,
+          tension: 0.3,
+          fill: false
+        }
       ]
     },
 
@@ -1334,15 +1313,7 @@ datasets: [
         intersect: false,
         mode: "index"
       },
-elements: {
-  line: {
-    borderWidth: 3
-  },
-  point: {
-    radius: 4,
-    hoverRadius: 7
-  }
-},
+
       plugins: {
         legend: {
           position: "bottom"
@@ -1360,6 +1331,7 @@ elements: {
     }
   });
 }
+
 
 
 // ANALYTICS DATA
