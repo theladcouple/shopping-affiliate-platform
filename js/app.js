@@ -273,7 +273,200 @@ const platforms = [
     `;
   }).join("");
 }
+  // PRODUCT DETAILS POPUP
 
+  const productModal = document.getElementById("productModal");
+  const modalProductContent = document.getElementById("modalProductContent");
+
+  function getProductPrice(product) {
+    return product.price != null
+      ? "₹" + Number(product.price).toLocaleString("en-IN")
+      : "Price unavailable";
+  }
+
+  function getProductPlatforms(product) {
+    return [
+      {
+        name: "Amazon",
+        icon: "🛒",
+        url: String(product.amazon_url || "").trim(),
+        className: "amazon"
+      },
+      {
+        name: "Flipkart",
+        icon: "🛍️",
+        url: String(product.flipkart_url || "").trim(),
+        className: "flipkart"
+      },
+      {
+        name: "Meesho",
+        icon: "💗",
+        url: String(product.meesho_url || "").trim(),
+        className: "meesho"
+      }
+    ].filter(platform =>
+      /^https?:\/\//i.test(platform.url)
+    );
+  }
+
+  function getRelatedProducts(currentProduct) {
+    const otherProducts = allProducts.filter(product =>
+      String(product.id) !== String(currentProduct.id)
+    );
+
+    const sameCategory = otherProducts.filter(product =>
+      Number(product.category_id) === Number(currentProduct.category_id)
+    );
+
+    const otherCategories = otherProducts.filter(product =>
+      Number(product.category_id) !== Number(currentProduct.category_id)
+    );
+
+    return [...sameCategory, ...otherCategories].slice(0, 4);
+  }
+
+  function showProductModal(product) {
+    if (!product || !productModal || !modalProductContent) return;
+
+    const platforms = getProductPlatforms(product);
+
+    const buyButtons = platforms.map(platform => `
+      <a class="platform-btn ${platform.className}"
+         href="${escapeHTML(platform.url)}"
+         target="_blank"
+         rel="noopener noreferrer">
+        <span>${platform.icon}</span>
+        ${platform.name} - Buy Now
+      </a>
+    `).join("");
+
+    const relatedProducts = getRelatedProducts(product);
+
+    const relatedHTML = relatedProducts.length
+      ? relatedProducts.map(item => `
+          <article class="related-product-card"
+                   data-related-product-id="${escapeHTML(item.id)}">
+
+            <img src="${escapeHTML(item.image_url || "")}"
+                 alt="${escapeHTML(item.title)}"
+                 onerror="this.style.display='none'">
+
+            <h4>${escapeHTML(item.title)}</h4>
+
+            <p>${escapeHTML(getProductPrice(item))}</p>
+
+          </article>
+        `).join("")
+      : "<p>More products coming soon.</p>";
+
+    modalProductContent.innerHTML = `
+      <div class="modal-product-details">
+
+        <div>
+          <img class="modal-product-image"
+               src="${escapeHTML(product.image_url || "")}"
+               alt="${escapeHTML(product.title)}"
+               onerror="this.style.display='none'">
+        </div>
+
+        <div class="modal-product-info">
+
+          <p class="product-category">
+            ${escapeHTML(product.category_name || "Shopping")}
+          </p>
+
+          <h2 id="modalProductTitle">
+            ${escapeHTML(product.title)}
+          </h2>
+
+          <p class="product-price">
+            ${escapeHTML(getProductPrice(product))}
+          </p>
+
+          ${
+            product.description
+              ? `<p class="modal-product-description">
+                   ${escapeHTML(product.description)}
+                 </p>`
+              : ""
+          }
+
+          <div class="modal-buy-buttons">
+            ${buyButtons || "<p>Buy link currently unavailable.</p>"}
+          </div>
+
+        </div>
+      </div>
+
+      <section class="related-products-section">
+        <h3>You May Also Like</h3>
+
+        <div class="related-products-grid">
+          ${relatedHTML}
+        </div>
+      </section>
+    `;
+
+    productModal.classList.add("is-open");
+    productModal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+
+    productModal.querySelector(".product-modal-close").focus();
+  }
+
+  function closeProductModal() {
+    if (!productModal) return;
+
+    productModal.classList.remove("is-open");
+    productModal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+  }
+
+  // Product card click opens popup.
+  productContainer.addEventListener("click", event => {
+    if (event.target.closest("a.platform-btn")) return;
+
+    const card = event.target.closest(".product-card");
+
+    if (!card) return;
+
+    const product = allProducts.find(item =>
+      String(item.id) === String(card.dataset.productId)
+    );
+
+    if (product) {
+      showProductModal(product);
+    }
+  });
+
+  // Related product click opens its details in the same popup.
+  modalProductContent.addEventListener("click", event => {
+    const relatedCard = event.target.closest("[data-related-product-id]");
+
+    if (!relatedCard) return;
+
+    const product = allProducts.find(item =>
+      String(item.id) === String(relatedCard.dataset.relatedProductId)
+    );
+
+    if (product) {
+      showProductModal(product);
+    }
+  });
+
+  // Close button and backdrop.
+  productModal.addEventListener("click", event => {
+    if (event.target.closest("[data-close-modal]")) {
+      closeProductModal();
+    }
+  });
+
+  // Close popup with Escape key.
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && productModal.classList.contains("is-open")) {
+      closeProductModal();
+    }
+  });
 
   function escapeHTML(value) {
     return String(value).replace(/[&<>"']/g, char => ({
