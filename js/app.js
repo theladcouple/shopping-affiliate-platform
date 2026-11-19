@@ -7,14 +7,135 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let allProducts = [];
 
-  async function loadSiteSettings() {
-    try {
-      const response = await fetch("/api/settings");
-      const data = await response.json();
+  
+async function loadSiteSettings() {
+  try {
+    const response = await fetch("/api/settings");
+    const data = await response.json();
 
-      if (!response.ok || !data.success) {
-        throw new Error("Settings could not load");
+    if (!response.ok || !data.success) {
+      throw new Error("Settings could not load");
+    }
+
+    const settings = data.settings;
+    const siteName = settings.site_name || "The Lad Couple";
+
+    // Update browser tab title
+    document.title = settings.seo_title || siteName;
+
+    // Update SEO description
+    const metaDescription = document.querySelector(
+      'meta[name="description"]'
+    );
+
+    if (metaDescription && settings.seo_description) {
+      metaDescription.content = settings.seo_description;
+    }
+
+    // Update Header and Footer logos
+    function updateLogo(id) {
+      const element = document.getElementById(id);
+
+      if (!element) return;
+
+      element.replaceChildren();
+
+      if (settings.logo_url) {
+        const img = document.createElement("img");
+
+        img.src = settings.logo_url;
+        img.alt = siteName + " Logo";
+        img.style.maxHeight = "45px";
+        img.style.maxWidth = "160px";
+        img.style.objectFit = "contain";
+
+        element.appendChild(img);
+      } else {
+        element.textContent = siteName;
       }
+    }
+
+    updateLogo("siteLogoHeader");
+    updateLogo("siteLogoFooter");
+
+    // Update Contact Information
+    const contact = document.getElementById("siteContactInfo");
+
+    if (contact) {
+      contact.replaceChildren();
+
+      if (settings.contact_email) {
+        const email = document.createElement("a");
+        email.href = "mailto:" + settings.contact_email;
+        email.textContent = settings.contact_email;
+        contact.appendChild(email);
+      }
+
+      if (settings.contact_phone) {
+        const phone = document.createElement("a");
+        phone.href = "tel:" + settings.contact_phone;
+        phone.textContent = settings.contact_phone;
+        contact.appendChild(phone);
+      }
+    }
+
+    // Create Social Media Buttons
+    function updateSocialLinks(containerId) {
+      const container = document.getElementById(containerId);
+
+      if (!container) return;
+
+      container.replaceChildren();
+
+      const links = [
+        {
+          name: "Follow Us",
+          icon: "📸",
+          url: settings.instagram_url,
+          className: "instagram",
+          label: "Follow The Lad Couple on Instagram"
+        },
+        {
+          name: "Subscribe",
+          icon: "▶",
+          url: settings.youtube_url,
+          className: "youtube",
+          label: "Subscribe to The Lad Couple on YouTube"
+        },
+        {
+          name: "Facebook",
+          icon: "f",
+          url: settings.facebook_url,
+          className: "facebook",
+          label: "Follow The Lad Couple on Facebook"
+        }
+      ];
+
+      links.forEach(item => {
+        if (!item.url) return;
+
+        const link = document.createElement("a");
+
+        link.href = item.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.className = "social-link " + item.className;
+        link.textContent = item.icon + " " + item.name;
+        link.setAttribute("aria-label", item.label);
+
+        container.appendChild(link);
+      });
+    }
+
+    // Show buttons in Header and Footer
+    updateSocialLinks("siteHeaderSocialLinks");
+    updateSocialLinks("siteSocialLinks");
+
+  } catch (error) {
+    console.error("SITE_SETTINGS_ERROR:", error);
+  }
+}
+
 
       const settings = data.settings;
       const siteName = settings.site_name || "The Lad Couple";
