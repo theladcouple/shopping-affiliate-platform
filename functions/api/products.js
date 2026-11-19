@@ -8,6 +8,7 @@ export async function onRequestGet({ env }) {
         p.slug,
         p.description,
         p.category_id,
+        p.product_code,
         p.image_url,
         p.price,
         p.original_price,
@@ -29,6 +30,8 @@ export async function onRequestGet({ env }) {
     });
 
   } catch (error) {
+    console.error("Products API Error:", error);
+
     return Response.json({
       success: false,
       error: "Unable to load products"
