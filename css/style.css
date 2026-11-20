@@ -897,3 +897,18 @@ body.modal-open {
     font-size: 14px;
   }
 }
+/* AFFILIATE DISCLOSURE */
+
+.affiliate-note {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.amazon-associate-disclosure {
+  color: #cbd5e1;
+  font-size: 12px;
+  margin-top: 10px;
+}
