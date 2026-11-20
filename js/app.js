@@ -294,7 +294,9 @@ function renderProducts(products) {
           <div class="platform-links">
             ${buyButtons}
           </div>
-
+<p class="affiliate-note">
+  Affiliate link: We may earn a commission if you make a purchase.
+</p>
         </div>
       </article>
     `;
@@ -439,7 +441,9 @@ function renderProducts(products) {
           <div class="modal-buy-buttons">
             ${buyButtons || "<p>Buy link currently unavailable.</p>"}
           </div>
-
+<p class="affiliate-note">
+  Affiliate link: We may earn a commission if you make a purchase.
+</p>
         </div>
       </div>
 
