@@ -748,7 +748,10 @@ function searchProducts() {
     renderProducts(allProducts);
     return;
   }
-
+// INITIAL LOAD
+loadSiteSettings();
+loadCategories();
+loadProducts();
   const filtered = allProducts.filter(product =>
     String(product.title || "").toLowerCase().includes(term) ||
     String(product.category_name || "").toLowerCase().includes(term) ||
