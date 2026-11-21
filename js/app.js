@@ -390,30 +390,38 @@ function renderProducts(products) {
 
     const relatedProducts = getRelatedProducts(product);
 
-    const relatedHTML = relatedProducts.length
-      ? relatedProducts.map(item => `
-          <article class="related-product-card"
-                   data-related-product-id="${escapeHTML(item.id)}">
+const relatedHTML = relatedProducts.length
+  ? relatedProducts.map(item => `
+      <article class="related-product-card"
+               data-related-product-id="${escapeHTML(item.id)}">
 
-            <img src="${escapeHTML(item.image_url || "")}"
-                 alt="${escapeHTML(item.title)}"
-                 onerror="this.style.display='none'">
+        <img src="${escapeHTML(item.image_url || "")}"
+             alt="${escapeHTML(item.title)}"
+             onerror="this.style.display='none'">
 
-            <h4>${escapeHTML(item.title)}</h4>
+        <h4>${escapeHTML(item.title)}</h4>
 
-            <p>${escapeHTML(getProductPrice(item))}</p>
-${
-  item.product_code
-    ? `<button type="button" class="copy-code-btn"
-        data-code="${escapeHTML(item.product_code)}"
-        style="padding:6px 10px; border:1px solid #b83268; border-radius:5px; background:white; color:#b83268; cursor:pointer; font-size:12px;">
-        Copy Code
-      </button>`
-    : ""
-}
-          </article>
-        `).join("")
-      : "<p>More products coming soon.</p>";
+        <p>${escapeHTML(getProductPrice(item))}</p>
+
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+          <strong style="color:#b83268; letter-spacing:1px;">
+            ${escapeHTML(item.product_code || "Not assigned")}
+          </strong>
+
+          ${
+            item.product_code
+              ? `<button type="button" class="copy-code-btn"
+                  data-code="${escapeHTML(item.product_code)}"
+                  style="padding:6px 10px; border:1px solid #b83268; border-radius:5px; background:white; color:#b83268; cursor:pointer; font-size:12px;">
+                  Copy Code
+                </button>`
+              : ""
+          }
+        </div>
+
+      </article>
+    `).join("")
+  : "<p>More products coming soon.</p>";
 
     modalProductContent.innerHTML = `
       <div class="modal-product-details">
@@ -507,7 +515,11 @@ ${
     productModal.classList.remove("is-open");
     productModal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
-  }
+
+    if (searchInput.value.trim() === "") {
+      renderProducts(allProducts);
+    }
+}
   // BEFORE BUY SUGGESTION POPUP
 
   const beforeBuyModal = document.getElementById("beforeBuyModal");
@@ -524,42 +536,38 @@ ${
     // Automatically get related products
     const relatedProducts = getRelatedProducts(product);
 
-    beforeBuyProducts.innerHTML = relatedProducts.length
-      ? relatedProducts.map(item => `
-          <article class="related-product-card"
-                   data-before-buy-product-id="${escapeHTML(item.id)}">
+beforeBuyProducts.innerHTML = relatedProducts.length
+  ? relatedProducts.map(item => `
+      <article class="related-product-card"
+               data-before-buy-product-id="${escapeHTML(item.id)}">
 
-            <img src="${escapeHTML(item.image_url || "")}"
-                 alt="${escapeHTML(item.title)}"
-                 onerror="this.style.display='none'">
+        <img src="${escapeHTML(item.image_url || "")}"
+             alt="${escapeHTML(item.title)}"
+             onerror="this.style.display='none'">
 
-            <<h4>${escapeHTML(item.title)}</h4>
+        <h4>${escapeHTML(item.title)}</h4>
 
-<p>${escapeHTML(getProductPrice(item))}</p>
+        <p>${escapeHTML(getProductPrice(item))}</p>
 
-${
-  item.product_code
-    ? `<button type="button" class="copy-code-btn"
-        data-code="${escapeHTML(item.product_code)}"
-        style="padding:6px 10px; border:1px solid #b83268; border-radius:5px; background:white; color:#b83268; cursor:pointer; font-size:12px;">
-        Copy Code
-      </button>`
-    : ""
-}
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+          <strong style="color:#b83268; letter-spacing:1px;">
+            ${escapeHTML(item.product_code || "Not assigned")}
+          </strong>
 
-${
-  item.product_code
-    ? `<button type="button" class="copy-code-btn"
-        data-code="${escapeHTML(item.product_code)}"
-        style="padding:6px 10px; border:1px solid #b83268; border-radius:5px; background:white; color:#b83268; cursor:pointer; font-size:12px;">
-        Copy Code
-      </button>`
-    : ""
-}
+          ${
+            item.product_code
+              ? `<button type="button" class="copy-code-btn"
+                  data-code="${escapeHTML(item.product_code)}"
+                  style="padding:6px 10px; border:1px solid #b83268; border-radius:5px; background:white; color:#b83268; cursor:pointer; font-size:12px;">
+                  Copy Code
+                </button>`
+              : ""
+          }
+        </div>
 
-          </article>
-        `).join("")
-      : "<p>No other products available right now.</p>";
+      </article>
+    `).join("")
+  : "<p>No other products available right now.</p>";
 
     beforeBuyModal.classList.add("is-open");
     beforeBuyModal.setAttribute("aria-hidden", "false");
@@ -610,6 +618,7 @@ ${
 
   // Clicking a suggestion opens that product in the first popup
   beforeBuyProducts.addEventListener("click", event => {
+    if (event.target.closest(".copy-code-btn")) return;
     const card = event.target.closest("[data-before-buy-product-id]");
 
     if (!card) return;
@@ -669,6 +678,7 @@ if (event.target.closest(".copy-code-btn")) return;
 
   // Related product click opens its details in the same popup.
   modalProductContent.addEventListener("click", event => {
+    if (event.target.closest(".copy-code-btn")) return;
     const relatedCard = event.target.closest("[data-related-product-id]");
 
     if (!relatedCard) return;
@@ -732,12 +742,14 @@ if (event.target.closest(".copy-code-btn")) return;
 function searchProducts() {
   const term = searchInput.value.trim().toLowerCase();
 
+  searchInput.value = "";
+
   if (!term) {
     renderProducts(allProducts);
     return;
   }
-  
- const filtered = allProducts.filter(product =>
+
+  const filtered = allProducts.filter(product =>
     String(product.title || "").toLowerCase().includes(term) ||
     String(product.category_name || "").toLowerCase().includes(term) ||
     String(product.product_code || "").trim().toLowerCase().includes(term)
@@ -746,29 +758,3 @@ function searchProducts() {
   renderProducts(filtered);
   productSection.scrollIntoView({ behavior: "smooth" });
 }
-
-  searchButton.addEventListener("click", searchProducts);
-
-  searchInput.addEventListener("keydown", event => {
-    if (event.key === "Enter") searchProducts();
-  });
-  searchInput.addEventListener("input", () => {
-  if (!searchInput.value.trim()) {
-    renderProducts(allProducts);
-  }
-});
-    const categoryGrid = document.getElementById("categoryGrid");
-
-  categoryGrid.addEventListener("click", event => {
-    const categoryLink = event.target.closest("a[data-category-id]");
-
-    if (!categoryLink) return;
-
-    event.preventDefault();
-
-    filterByCategory(categoryLink.dataset.categoryId);
-  });
-  loadSiteSettings();
-loadCategories();
-    loadProducts();
-});
