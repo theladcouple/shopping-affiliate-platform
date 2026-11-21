@@ -341,8 +341,8 @@ a {
 /* PRODUCT GRID */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
   width: 100%;
 }
 
@@ -362,14 +362,14 @@ a {
 .product-card img {
   display: block;
   width: 100%;
-  height: 220px;
+  height: 170px;
   object-fit: contain;
-  padding: 15px;
-  background: #f8fafc;
+  padding: 10px;
+  background: #ffffff;
 }
 
 .product-info {
-  padding: 18px;
+  padding: 12px;
 }
 
 .product-category {
@@ -401,7 +401,7 @@ a {
 
 @media (max-width: 850px) {
   .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
