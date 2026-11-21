@@ -39,21 +39,27 @@ document.addEventListener("DOMContentLoaded", () => {
   element.replaceChildren();
 
   const img = document.createElement("img");
-
   img.src = "/images/the-lad-couple-logo.png";
-  img.alt = "The Lad Couple";
+  img.alt = "The Lad Couple Logo";
 
-  img.style.display = "block";
-  img.style.width = "100%";
-  img.style.height = "100%";
-  img.style.maxHeight = "100%";
-  img.style.maxWidth = "100%";
-  img.style.objectFit = "contain";
+  const brandText = document.createElement("span");
+  brandText.className = "brand-name";
+
+  const brandTitle = document.createElement("strong");
+  brandTitle.textContent = "The Lad Couple";
+
+  const brandSubtitle = document.createElement("small");
+  brandSubtitle.textContent = "STORE";
+
+  brandText.appendChild(brandTitle);
+  brandText.appendChild(brandSubtitle);
 
   element.appendChild(img);
+  element.appendChild(brandText);
 }
-      updateLogo("siteLogoHeader");
-      updateLogo("siteLogoFooter");
+
+updateLogo("siteLogoHeader");
+updateLogo("siteLogoFooter");
 
       const contact = document.getElementById("siteContactInfo");
 
