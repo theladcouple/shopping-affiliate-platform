@@ -444,9 +444,21 @@ function renderProducts(products) {
     Product Code
   </span>
 
+  <div style="display:flex; align-items:center; gap:8px;">
   <strong style="color: #b83268; letter-spacing: 1px;">
     ${escapeHTML(product.product_code || "Not assigned")}
   </strong>
+
+  ${
+    product.product_code
+      ? `<button type="button" class="copy-code-btn"
+          data-code="${escapeHTML(product.product_code)}"
+          style="padding:6px 10px; border:1px solid #b83268; border-radius:5px; background:white; color:#b83268; cursor:pointer; font-size:12px;">
+          Copy Code
+        </button>`
+      : ""
+  }
+</div>
 </div>
           ${
             product.description
@@ -513,9 +525,29 @@ function renderProducts(products) {
                  alt="${escapeHTML(item.title)}"
                  onerror="this.style.display='none'">
 
-            <h4>${escapeHTML(item.title)}</h4>
+            <<h4>${escapeHTML(item.title)}</h4>
 
-            <p>${escapeHTML(getProductPrice(item))}</p>
+<p>${escapeHTML(getProductPrice(item))}</p>
+
+${
+  item.product_code
+    ? `<button type="button" class="copy-code-btn"
+        data-code="${escapeHTML(item.product_code)}"
+        style="padding:6px 10px; border:1px solid #b83268; border-radius:5px; background:white; color:#b83268; cursor:pointer; font-size:12px;">
+        Copy Code
+      </button>`
+    : ""
+}
+
+${
+  item.product_code
+    ? `<button type="button" class="copy-code-btn"
+        data-code="${escapeHTML(item.product_code)}"
+        style="padding:6px 10px; border:1px solid #b83268; border-radius:5px; background:white; color:#b83268; cursor:pointer; font-size:12px;">
+        Copy Code
+      </button>`
+    : ""
+}
 
           </article>
         `).join("")
@@ -585,7 +617,7 @@ function renderProducts(products) {
   });
    // Product card and Buy Now click handling.
   productContainer.addEventListener("click", event => {
-
+if (event.target.closest(".copy-code-btn")) return;
     const card = event.target.closest(".product-card");
 
     if (!card) return;
@@ -667,13 +699,14 @@ function renderProducts(products) {
     })[char]);
   }
 
-  productContainer.addEventListener("click", async (event) => {
+  document.addEventListener("click", async (event) => {
   const copyButton = event.target.closest(".copy-code-btn");
 
   if (!copyButton) return;
 
   event.preventDefault();
   event.stopPropagation();
+  event.stopImmediatePropagation();
 
   const code = copyButton.dataset.code;
 
@@ -687,7 +720,7 @@ function renderProducts(products) {
   } catch (error) {
     alert("Code copy nahi zala. Please manually copy kara: " + code);
   }
-});
+}, true);
 function searchProducts() {
   const term = searchInput.value.trim().toLowerCase();
 
