@@ -695,7 +695,7 @@ function searchProducts() {
     renderProducts(allProducts);
     return;
   }
-
+searchInput.value = "";
   const filtered = allProducts.filter(product =>
     String(product.title || "").toLowerCase().includes(term) ||
     String(product.category_name || "").toLowerCase().includes(term) ||
