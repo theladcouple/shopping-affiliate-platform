@@ -32,25 +32,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       function updateLogo(id) {
-        const element = document.getElementById(id);
+  const element = document.getElementById(id);
 
-        if (!element) return;
+  if (!element) return;
 
-        element.replaceChildren();
+  element.replaceChildren();
 
-        if (settings.logo_url) {
-          const img = document.createElement("img");
-          img.src = settings.logo_url;
-          img.alt = siteName + " Logo";
-          img.style.maxHeight = "45px";
-          img.style.maxWidth = "160px";
-          img.style.objectFit = "contain";
-          element.appendChild(img);
-        } else {
-          element.textContent = siteName;
-        }
-      }
+  const img = document.createElement("img");
 
+  img.src = "/images/the-lad-couple-logo.png";
+  img.alt = "The Lad Couple";
+
+  img.style.display = "block";
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.maxHeight = "100%";
+  img.style.maxWidth = "100%";
+  img.style.objectFit = "contain";
+
+  element.appendChild(img);
+}
       updateLogo("siteLogoHeader");
       updateLogo("siteLogoFooter");
 
