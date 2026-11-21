@@ -402,7 +402,15 @@ function renderProducts(products) {
             <h4>${escapeHTML(item.title)}</h4>
 
             <p>${escapeHTML(getProductPrice(item))}</p>
-
+${
+  item.product_code
+    ? `<button type="button" class="copy-code-btn"
+        data-code="${escapeHTML(item.product_code)}"
+        style="padding:6px 10px; border:1px solid #b83268; border-radius:5px; background:white; color:#b83268; cursor:pointer; font-size:12px;">
+        Copy Code
+      </button>`
+    : ""
+}
           </article>
         `).join("")
       : "<p>More products coming soon.</p>";
@@ -728,8 +736,8 @@ function searchProducts() {
     renderProducts(allProducts);
     return;
   }
-searchInput.value = "";
-  const filtered = allProducts.filter(product =>
+  
+ const filtered = allProducts.filter(product =>
     String(product.title || "").toLowerCase().includes(term) ||
     String(product.category_name || "").toLowerCase().includes(term) ||
     String(product.product_code || "").trim().toLowerCase().includes(term)
@@ -744,6 +752,11 @@ searchInput.value = "";
   searchInput.addEventListener("keydown", event => {
     if (event.key === "Enter") searchProducts();
   });
+  searchInput.addEventListener("input", () => {
+  if (!searchInput.value.trim()) {
+    renderProducts(allProducts);
+  }
+});
     const categoryGrid = document.getElementById("categoryGrid");
 
   categoryGrid.addEventListener("click", event => {
