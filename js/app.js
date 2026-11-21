@@ -656,17 +656,24 @@ function renderProducts(products) {
     })[char]);
   }
 
-  function searchProducts() {
-    const term = searchInput.value.trim().toLowerCase();
+  
+function searchProducts() {
+  const term = searchInput.value.trim().toLowerCase();
 
-    const filtered = allProducts.filter(product =>
-      product.title.toLowerCase().includes(term) ||
-      (product.category_name || "").toLowerCase().includes(term)
-    );
-
-    renderProducts(filtered);
-    productSection.scrollIntoView({ behavior: "smooth" });
+  if (!term) {
+    renderProducts(allProducts);
+    return;
   }
+
+  const filtered = allProducts.filter(product =>
+    String(product.title || "").toLowerCase().includes(term) ||
+    String(product.category_name || "").toLowerCase().includes(term) ||
+    String(product.product_code || "").trim().toLowerCase().includes(term)
+  );
+
+  renderProducts(filtered);
+  productSection.scrollIntoView({ behavior: "smooth" });
+}
 
   searchButton.addEventListener("click", searchProducts);
 
