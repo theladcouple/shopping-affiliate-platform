@@ -912,92 +912,133 @@ body.modal-open {
   font-size: 12px;
   margin-top: 10px;
 }
-/* THE LAD COUPLE IMAGE LOGO */
+
+/* THE LAD COUPLE BRAND LOGO */
 
 .logo.logo-image {
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  width: 150px;
-  height: 75px;
-  padding: 5px;
-  background: #ffffff;
+  gap: 12px;
+  width: auto;
+  height: 70px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   border-radius: 0;
   flex-shrink: 0;
-  line-height: 0;
+  line-height: normal;
+  white-space: nowrap;
 }
 
 .logo.logo-image img {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 75px;
+  height: 65px;
+  max-width: 75px;
+  max-height: 65px;
   object-fit: contain;
-  object-position: left center;
+  object-position: center;
+  flex-shrink: 0;
 }
 
-/* FOOTER LOGO */
+.brand-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.brand-name strong {
+  font-size: 20px;
+  font-weight: 800;
+  color: #172033;
+}
+
+.brand-name small {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* HEADER */
+
+.header {
+  background: #ffffff;
+}
+
+.header .navbar {
+  gap: 16px;
+}
+
+.header .logo.logo-image {
+  background: #ffffff;
+}
+
+.nav-links {
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+/* FOOTER */
+
+.footer {
+  background: #172033;
+  color: #ffffff;
+}
 
 .footer .logo.logo-image {
-  width: 150px;
-  height: 90px;
-  margin: 0;
-  background: #ffffff;
+  background: transparent;
+}
+
+.footer .brand-name strong {
+  color: #ffffff;
+}
+
+.footer .brand-name small {
+  color: #cbd5e1;
 }
 
 /* MOBILE */
 
-@media (max-width: 600px) {
-  .logo.logo-image {
-    width: 120px;
-    height: 65px;
+@media (max-width: 850px) {
+  .header .navbar {
+    justify-content: space-between;
   }
 
-  .footer .logo.logo-image {
-    width: 130px;
-    height: 75px;
+  .header .nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: center;
   }
-}
-/* THE LAD COUPLE LOGO FIX */
-
-.logo.logo-image {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  width: 150px !important;
-  height: 75px !important;
-  padding: 5px !important;
-  background: #ffffff !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  overflow: hidden;
-  flex-shrink: 0;
-  line-height: 0;
-}
-
-.logo.logo-image img {
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: contain !important;
-  object-position: left center !important;
-}
-
-.footer .logo.logo-image {
-  margin: 0 !important;
-  background: #ffffff !important;
 }
 
 @media (max-width: 600px) {
   .logo.logo-image {
-    width: 120px !important;
-    height: 65px !important;
+    height: 60px;
+    gap: 8px;
   }
 
-  .footer .logo.logo-image {
-    width: 130px !important;
-    height: 75px !important;
+  .logo.logo-image img {
+    width: 60px;
+    height: 55px;
+    max-width: 60px;
+    max-height: 55px;
+  }
+
+  .brand-name strong {
+    font-size: 17px;
+  }
+
+  .brand-name small {
+    font-size: 10px;
+  }
+
+  .header .nav-links {
+    justify-content: flex-start;
   }
 }
