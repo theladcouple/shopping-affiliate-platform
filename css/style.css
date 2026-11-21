@@ -912,3 +912,42 @@ body.modal-open {
   font-size: 12px;
   margin-top: 10px;
 }
+/* THE LAD COUPLE IMAGE LOGO */
+
+.logo.logo-image {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 135px;
+  height: 76px;
+  padding: 3px;
+  background: #080808;
+  border-radius: 10px;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.logo.logo-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.footer .logo.logo-image {
+  width: 150px;
+  height: 100px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .logo.logo-image {
+    width: 110px;
+    height: 70px;
+  }
+
+  .footer .logo.logo-image {
+    width: 135px;
+    height: 90px;
+  }
+}
