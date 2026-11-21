@@ -289,13 +289,24 @@ function renderProducts(products) {
               Product Code
             </span>
 
-            <strong style="
-              color: #b83268;
-              font-size: 14px;
-              letter-spacing: 1px;
-            ">
-              ${escapeHTML(product.product_code || "Not assigned")}
-            </strong>
+            <div style="display:flex; align-items:center; gap:8px;">
+  <strong style="
+    color: #b83268;
+    font-size: 14px;
+    letter-spacing: 1px;
+  ">
+    ${escapeHTML(product.product_code || "Not assigned")}
+  </strong>
+
+  ${
+    product.product_code
+      ? `<button type="button" class="copy-code-btn" data-code="${escapeHTML(product.product_code)}"
+          style="padding:5px 9px; border:1px solid #b83268; border-radius:5px; background:white; color:#b83268; cursor:pointer; font-size:12px;">
+          Copy Code
+        </button>`
+      : ""
+  }
+</div>
           </div>
 
           <div class="platform-links">
@@ -656,7 +667,27 @@ function renderProducts(products) {
     })[char]);
   }
 
-  
+  productContainer.addEventListener("click", async (event) => {
+  const copyButton = event.target.closest(".copy-code-btn");
+
+  if (!copyButton) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const code = copyButton.dataset.code;
+
+  try {
+    await navigator.clipboard.writeText(code);
+    copyButton.textContent = "Copied!";
+
+    setTimeout(() => {
+      copyButton.textContent = "Copy Code";
+    }, 1500);
+  } catch (error) {
+    alert("Code copy nahi zala. Please manually copy kara: " + code);
+  }
+});
 function searchProducts() {
   const term = searchInput.value.trim().toLowerCase();
 
