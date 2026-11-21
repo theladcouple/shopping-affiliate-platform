@@ -759,6 +759,19 @@ function searchProducts() {
   productSection.scrollIntoView({ behavior: "smooth" });
 }
 
+// SEARCH BUTTON AND ENTER KEY
+if (searchButton) {
+  searchButton.addEventListener("click", searchProducts);
+}
+
+if (searchInput) {
+  searchInput.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      searchProducts();
+    }
+  });
+}
+
 // INITIAL LOAD
 loadSiteSettings();
 loadCategories();
