@@ -1,3 +1,4 @@
+
 import { requireAdmin } from "./_auth.js";
 
 function json(data, status = 200) {
@@ -49,6 +50,7 @@ function validateCategory(body) {
       return "Invalid image URL";
     }
   }
+
   if (
     body.show_in_men !== undefined &&
     ![0, 1, true, false].includes(body.show_in_men)
@@ -62,10 +64,10 @@ function validateCategory(body) {
   ) {
     return "Invalid Women visibility";
   }
+
   return null;
 }
 
-// Generate a unique code for every new category.
 async function generateCategoryCode(env, slug) {
   const base = slug
     .replace(/[^a-z0-9]/g, "")
@@ -110,6 +112,7 @@ export async function onRequestGet({ request, env }) {
       success: true,
       categories: result.results || []
     });
+
   } catch (error) {
     console.error("ADMIN_CATEGORIES_GET_ERROR:", error);
 
@@ -135,7 +138,6 @@ export async function onRequestPost({ request, env }) {
       return json({ success: false, error }, 400);
     }
 
-    // Automatically generate a unique category code.
     const categoryCode = await generateCategoryCode(env, body.slug.trim());
 
     const result = await env.DB.prepare(`
@@ -202,7 +204,6 @@ export async function onRequestPut({ request, env }) {
       return json({ success: false, error }, 400);
     }
 
-    // Existing category code is intentionally preserved.
     const result = await env.DB.prepare(`
       UPDATE categories SET
         name = ?,
@@ -227,16 +228,6 @@ export async function onRequestPut({ request, env }) {
         ? null : (body.show_in_men ? 1 : 0),
       body.show_in_women === undefined
         ? null : (body.show_in_women ? 1 : 0),
-      id
-    ).run();
-      body.name.trim(),
-      body.slug.trim(),
-      typeof body.description === "string"
-        ? body.description.trim() || null : null,
-      typeof body.image_url === "string"
-        ? body.image_url.trim() || null : null,
-      body.is_active === undefined ? 1 : (body.is_active ? 1 : 0),
-      body.sort_order === undefined ? 0 : Number(body.sort_order),
       id
     ).run();
 
