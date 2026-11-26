@@ -188,8 +188,9 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = list.map(category => {
           const icon = category.slug === "fashion"
   ? (gender === "men" ? "👕" : gender === "women" ? "👗" : "🛍️")
-  : (icons[category.slug] || "🛍️");
-          const image = String(category.image_url || "").trim();
+  : category.slug === "beauty-personal-care"
+    ? (gender === "men" ? "🧴" : gender === "women" ? "💄" : "🛍️")
+    : (icons[category.slug] || "🛍️");
 
           return `
             <a class="category-card ${image ? "has-image" : ""}"
