@@ -1,5 +1,7 @@
 
 <script>
+  let challengeToken = null;
+
   document.getElementById("loginForm").addEventListener("submit", async function(event) {
     event.preventDefault();
 
@@ -19,11 +21,46 @@
     }
 
     button.disabled = true;
-    button.textContent = "Please wait...";
     message.style.color = "#64748b";
-    message.textContent = "Checking login details...";
 
     try {
+      if (challengeToken) {
+        const otpInput = document.getElementById("totpCode");
+        const code = otpInput.value;
+
+        if (!/^\d{6}$/.test(code)) {
+          throw new Error("Enter a valid 6-digit OTP.");
+        }
+
+        button.textContent = "Verifying OTP...";
+        message.textContent = "Checking authenticator code...";
+
+        const response = await fetch("/api/admin/totp-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            challenge_token: challengeToken,
+            code
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "OTP verification failed");
+        }
+
+        message.style.color = "green";
+        message.textContent = "Login successful! Redirecting...";
+
+        window.location.href = "/admin/dashboard.html";
+        return;
+      }
+
+      button.textContent = "Please wait...";
+      message.textContent = "Checking login details...";
+
       const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,97 +75,48 @@
       }
 
       if (data.requires_totp) {
-        let otpInput = document.getElementById("totpCode");
+        challengeToken = data.challenge_token;
 
-        if (!otpInput) {
-          const label = document.createElement("label");
-          label.textContent = "Google Authenticator OTP";
-          label.htmlFor = "totpCode";
+        const label = document.createElement("label");
+        label.htmlFor = "totpCode";
+        label.textContent = "Google Authenticator OTP";
 
-          otpInput = document.createElement("input");
-          otpInput.id = "totpCode";
-          otpInput.type = "text";
-          otpInput.inputMode = "numeric";
-          otpInput.maxLength = 6;
-          otpInput.placeholder = "Enter 6-digit OTP";
-          otpInput.autocomplete = "one-time-code";
-          otpInput.required = true;
+        const input = document.createElement("input");
+        input.id = "totpCode";
+        input.type = "text";
+        input.inputMode = "numeric";
+        input.maxLength = 6;
+        input.placeholder = "Enter 6-digit OTP";
+        input.autocomplete = "one-time-code";
+        input.required = true;
 
-          form.insertBefore(label, button);
-          form.insertBefore(otpInput, button);
-        }
+        form.insertBefore(label, button);
+        form.insertBefore(input, button);
 
-        otpInput.value = "";
-        otpInput.focus();
-        otpInput.addEventListener("input", () => {
-          otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
+        input.addEventListener("input", () => {
+          input.value = input.value.replace(/\D/g, "").slice(0, 6);
         });
 
-        message.textContent = "Enter your Google Authenticator OTP.";
+        document.getElementById("password").disabled = true;
+        document.getElementById("email").disabled = true;
+
+        message.textContent = "Enter your 6-digit authenticator code.";
         button.textContent = "Verify OTP";
+        input.focus();
         button.disabled = false;
-
-        form.onsubmit = async function(otpEvent) {
-          otpEvent.preventDefault();
-
-          const code = otpInput.value;
-
-          if (!/^\d{6}$/.test(code)) {
-            message.style.color = "red";
-            message.textContent = "Enter a valid 6-digit OTP.";
-            return;
-          }
-
-          button.disabled = true;
-          button.textContent = "Verifying...";
-
-          try {
-            const otpResponse = await fetch("/api/admin/totp-login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "same-origin",
-              body: JSON.stringify({
-                challenge_token: data.challenge_token,
-                code
-              })
-            });
-
-            const otpData = await otpResponse.json();
-
-            if (!otpResponse.ok || !otpData.success) {
-              throw new Error(otpData.error || "OTP verification failed");
-            }
-
-            message.style.color = "green";
-            message.textContent = "Login successful! Redirecting...";
-
-            window.location.href = "/admin/dashboard.html";
-
-          } catch (error) {
-            message.style.color = "red";
-            message.textContent = error.message;
-            button.disabled = false;
-            button.textContent = "Verify OTP";
-          }
-        };
-
         return;
       }
 
       message.style.color = "green";
-      message.textContent = "Login successful! Redirecting to dashboard...";
+      message.textContent = "Login successful! Redirecting...";
 
-      form.reset();
-
-      setTimeout(() => {
-        window.location.href = "/admin/dashboard.html";
-      }, 500);
+      window.location.href = "/admin/dashboard.html";
 
     } catch (error) {
       message.style.color = "red";
-      message.textContent = error.message || "Unable to connect. Please try again.";
+      message.textContent = error.message || "Login failed.";
       button.disabled = false;
-      button.textContent = "Login to Dashboard";
+      button.textContent = challengeToken ? "Verify OTP" : "Login to Dashboard";
     }
   });
 </script>
