@@ -200,7 +200,20 @@ function filterByCategory(categoryId) {
 
   productSection.scrollIntoView({ behavior: "smooth" });
 }
+// CATEGORY CARD CLICK
+const categoryGrid = document.getElementById("categoryGrid");
 
+categoryGrid.addEventListener("click", event => {
+  const categoryCard = event.target.closest(".category-card");
+
+  if (!categoryCard) return;
+
+  event.preventDefault();
+
+  const categoryId = categoryCard.dataset.categoryId;
+
+  filterByCategory(categoryId);
+});
 
 
 function renderProducts(products) {
