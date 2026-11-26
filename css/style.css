@@ -1260,3 +1260,30 @@ body.modal-open {
   }
 }
 
+/* MOBILE: SIMPLE COPY CODE BUTTON */
+
+@media (max-width: 600px) {
+  .product-code-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .product-code-actions strong {
+    display: none;
+  }
+
+  .copy-code-btn {
+    display: flex !important;
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 12px !important;
+    margin: 0;
+    border: none !important;
+    border-radius: 7px;
+    background: #b83268 !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 700;
+  }
+}
+
