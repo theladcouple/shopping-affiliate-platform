@@ -738,31 +738,7 @@ womenLabel.append(womenCheckbox, " Women's Collection");
 
 visibilityLabel.append(menLabel, womenLabel);
 
-details.append(name, slug, visibilityLabel);
-const visibilityLabel = document.createElement("div");
-visibilityLabel.textContent = "Display In:";
-visibilityLabel.style.cssText =
-  "display:block;margin-top:10px;font-weight:bold";
 
-const menLabel = document.createElement("label");
-menLabel.style.cssText = "display:block;margin-top:8px;cursor:pointer";
-
-const menCheckbox = document.createElement("input");
-menCheckbox.type = "checkbox";
-menCheckbox.checked = Number(category.show_in_men) === 1;
-
-menLabel.append(menCheckbox, " Men's Collection");
-
-const womenLabel = document.createElement("label");
-womenLabel.style.cssText = "display:block;margin-top:6px;cursor:pointer";
-
-const womenCheckbox = document.createElement("input");
-womenCheckbox.type = "checkbox";
-womenCheckbox.checked = Number(category.show_in_women) === 1;
-
-womenLabel.append(womenCheckbox, " Women's Collection");
-
-visibilityLabel.append(menLabel, womenLabel);
 details.append(name, slug, visibilityLabel);
 
       const actions = document.createElement("div");
