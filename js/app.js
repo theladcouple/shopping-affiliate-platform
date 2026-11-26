@@ -6,9 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const productContainer = productSection.querySelector(".empty-products");
 
   let allProducts = [];
-const menProductContainer = document.getElementById("menProductGrid");
-const womenProductContainer = document.getElementById("womenProductGrid");
-  
+
 
   async function loadSiteSettings() {
     try {
@@ -132,144 +130,98 @@ updateLogo("siteLogoFooter");
     } catch (error) {
       console.error("SITE_SETTINGS_ERROR:", error);
     }
-  }
-     async function loadCategories() {
-  const categoryGrid = document.getElementById("categoryGrid");
+  }async function loadCategories() {
+  const menGrid = document.getElementById("menCategoryGrid");
+  const womenGrid = document.getElementById("womenCategoryGrid");
+  const otherGrid = document.getElementById("otherCategoryGrid");
+
+  const icons = {
+    electronics: "📱",
+    "mobiles-accessories": "📱",
+    fashion: "👗",
+    "home-kitchen": "🏠",
+    "beauty-personal-care": "💄",
+    "health-fitness": "💪",
+    "sports-outdoors": "⚽",
+    "grocery-daily-needs": "🛒",
+    "shoes-footwear": "👟",
+    "bags-luggage": "👜",
+    "toys-baby-products": "🧸",
+    "books-stationery": "📚"
+  };
 
   try {
     const response = await fetch("/api/categories");
     const data = await response.json();
 
-    if (!data.success) {
+    if (!response.ok || !data.success) {
       throw new Error("Categories could not load");
     }
 
-    const icons = {
-      electronics: "📱",
-      "mobiles-accessories": "📱",
-      fashion: "👗",
-      "home-kitchen": "🏠",
-            "beauty-personal-care": "💄",
-      "health-fitness": "💪",
-      "sports-outdoors": "⚽",
-      "grocery-daily-needs": "🛒",
-      "shoes-footwear": "👟",
-      "bags-luggage": "👜",
-      "toys-baby-products": "🧸",
-      "books-stationery": "📚"
-    };
+    const categories = data.categories || [];
 
-    categoryGrid.innerHTML = (data.categories || []).map(category => `
-      <a class="category-card" href="#products" data-category-id="${category.id}">
-        <span>${icons[category.slug] || "🛍️"}</span>
-        <h3>${escapeHTML(category.name)}</h3>
-      </a>
-    `).join("");
+    function renderCategoryCards(list, gender) {
+      if (!list) return;
 
-    if (!data.categories || data.categories.length === 0) {
-      categoryGrid.innerHTML = "<p>No categories available.</p>";
+      if (!categories.length || !list.length) {
+        list.innerHTML = "<p>No categories available.</p>";
+        return;
+      }
+
+      list.innerHTML = list.map(category => {
+        const icon = icons[category.slug] || "🛍️";
+        const image = String(category.image_url || "").trim();
+
+        return `
+          <a class="category-card ${image ? "has-image" : ""}"
+             href="#products"
+             data-category-id="${escapeHTML(category.id)}"
+             data-gender="${gender}">
+
+            <span class="category-icon">${icon}</span>
+
+            ${
+              image
+                ? `<img class="category-image"
+                        src="${escapeHTML(image)}"
+                        alt="${escapeHTML(category.name)}"
+                        onerror="this.remove(); this.parentElement.classList.remove('has-image');">`
+                : ""
+            }
+
+            <h3>${escapeHTML(category.name)}</h3>
+          </a>
+        `;
+      }).join("");
     }
+
+    const menCategories = categories.filter(category =>
+      Number(category.show_in_men) === 1
+    );
+
+    const womenCategories = categories.filter(category =>
+      Number(category.show_in_women) === 1
+    );
+
+    const otherCategories = categories.filter(category =>
+      Number(category.show_in_men) !== 1 &&
+      Number(category.show_in_women) !== 1
+    );
+
+    renderCategoryCards(menCategories, "men");
+    renderCategoryCards(womenCategories, "women");
+    renderCategoryCards(otherCategories, "other");
 
   } catch (error) {
-    categoryGrid.innerHTML = "<p>Unable to load categories.</p>";
+    console.error("CATEGORIES_ERROR:", error);
+
+    [menGrid, womenGrid, otherGrid].forEach(grid => {
+      if (grid) {
+        grid.innerHTML = "<p>Unable to load categories.</p>";
+      }
+    });
   }
 }
-  async function loadProducts() {
-    try {
-      const response = await fetch("/api/products");
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error("Products could not load");
-      }
-
-      allProducts = data.products || [];
-
-renderProducts(
-  allProducts.filter(product => Number(product.is_featured) === 1)
-);
-
-renderProducts(
-  allProducts.filter(product =>
-    String(product.gender || "").trim().toLowerCase() === "men"
-  ),
-  menProductContainer
-);
-
-renderProducts(
-  allProducts.filter(product =>
-    String(product.gender || "").trim().toLowerCase() === "women"
-  ),
-  womenProductContainer
-);
-    } catch (error) {
-      productContainer.innerHTML = `
-        <h3>Unable to load products</h3>
-        <p>Please try again later.</p>
-      `;
-    }
-  }
-function filterByCategory(categoryId) {
-  const filtered = allProducts.filter(product =>
-    Number(product.category_id) === Number(categoryId)
-  );
-
-  renderProducts(filtered);
-
-  productSection.scrollIntoView({ behavior: "smooth" });
-}
-// CATEGORY CARD CLICK
-const categoryGrid = document.getElementById("categoryGrid");
-
-categoryGrid.addEventListener("click", event => {
-  const categoryCard = event.target.closest(".category-card");
-
-  if (!categoryCard) return;
-
-  event.preventDefault();
-
-  const categoryId = categoryCard.dataset.categoryId;
-
-  filterByCategory(categoryId);
-});
-
-
-function renderProducts(products, targetContainer = productContainer) {
-
-  if (!products.length) {
-    targetContainer.className = "empty-products";
-    targetContainer.innerHTML = `
-      <span>🛒</span>
-      <h3>Products Coming Soon</h3>
-      <p>We are preparing amazing products for you. Stay tuned!</p>
-    `;
-    return;
-  }
-
-  targetContainer.className = "product-grid";
-
-  targetContainer.innerHTML = products.map(product => {
-
-    const platforms = [
-      {
-        name: "Amazon",
-        icon: "🛒",
-        url: String(product.amazon_url || "").trim(),
-        className: "amazon"
-      },
-      {
-        name: "Flipkart",
-        icon: "🛍️",
-        url: String(product.flipkart_url || "").trim(),
-        className: "flipkart"
-      },
-      {
-        name: "Meesho",
-        icon: "💗",
-        url: String(product.meesho_url || "").trim(),
-        className: "meesho"
-      }
-    ];
 
     const buyButtons = platforms
       .filter(platform => platform.url)
@@ -774,9 +726,13 @@ function searchProducts() {
   searchInput.value = "";
 
     if (!term) {
-    renderProducts(
-      allProducts.filter(product => Number(product.is_featured) === 1)
-    );
+    allProducts = data.products || [];
+
+renderProducts(
+  allProducts.filter(product =>
+    Number(product.is_featured) === 1
+  )
+);
     return;
   }
 
@@ -789,7 +745,51 @@ function searchProducts() {
   renderProducts(filtered);
   productSection.scrollIntoView({ behavior: "smooth" });
 }
+function filterByCategory(categoryId, gender) {
+  const filtered = allProducts.filter(product => {
+    const productGender = String(product.gender || "")
+      .trim()
+      .toLowerCase();
 
+    const sameCategory =
+      Number(product.category_id) === Number(categoryId);
+
+    if (!sameCategory) return false;
+
+    if (gender === "men") {
+      return productGender === "men";
+    }
+
+    if (gender === "women") {
+      return productGender === "women";
+    }
+
+    return productGender !== "men" &&
+           productGender !== "women";
+  });
+
+  renderProducts(filtered);
+
+  productSection.scrollIntoView({ behavior: "smooth" });
+}
+
+// CATEGORY CARD CLICK
+const categoriesSection = document.getElementById("categories");
+
+if (categoriesSection) {
+  categoriesSection.addEventListener("click", event => {
+    const categoryCard = event.target.closest(".category-card");
+
+    if (!categoryCard) return;
+
+    event.preventDefault();
+
+    filterByCategory(
+      categoryCard.dataset.categoryId,
+      categoryCard.dataset.gender
+    );
+  });
+}
 // SEARCH BUTTON AND ENTER KEY
 if (searchButton) {
   searchButton.addEventListener("click", searchProducts);
