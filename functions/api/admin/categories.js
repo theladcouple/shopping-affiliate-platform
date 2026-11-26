@@ -34,7 +34,7 @@ function validateCategory(body) {
   if (
     body.sort_order !== undefined &&
     (!Number.isInteger(Number(body.sort_order)) ||
-     Number(body.sort_order) < 0)
+      Number(body.sort_order) < 0)
   ) {
     return "Sort order must be a non-negative number";
   }
@@ -63,6 +63,13 @@ function validateCategory(body) {
     ![0, 1, true, false].includes(body.show_in_women)
   ) {
     return "Invalid Women visibility";
+  }
+
+  if (
+    body.show_in_others !== undefined &&
+    ![0, 1, true, false].includes(body.show_in_others)
+  ) {
+    return "Invalid Other Categories visibility";
   }
 
   return null;
@@ -112,7 +119,6 @@ export async function onRequestGet({ request, env }) {
       success: true,
       categories: result.results || []
     });
-
   } catch (error) {
     console.error("ADMIN_CATEGORIES_GET_ERROR:", error);
 
@@ -142,10 +148,11 @@ export async function onRequestPost({ request, env }) {
 
     const result = await env.DB.prepare(`
       INSERT INTO categories (
-  name, slug, code, description, image_url,
-  is_active, sort_order, show_in_men, show_in_women
-)
-VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)
+        name, slug, code, description, image_url,
+        is_active, sort_order,
+        show_in_men, show_in_women, show_in_others
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 0)
     `).bind(
       body.name.trim(),
       body.slug.trim(),
@@ -164,7 +171,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)
       category_id: result.meta.last_row_id,
       category_code: categoryCode
     }, 201);
-
   } catch (error) {
     console.error("ADMIN_CATEGORIES_POST_ERROR:", error);
 
@@ -214,7 +220,8 @@ export async function onRequestPut({ request, env }) {
         is_active = ?,
         sort_order = ?,
         show_in_men = COALESCE(?, show_in_men),
-        show_in_women = COALESCE(?, show_in_women)
+        show_in_women = COALESCE(?, show_in_women),
+        show_in_others = COALESCE(?, show_in_others)
       WHERE id = ?
     `).bind(
       body.name.trim(),
@@ -229,6 +236,8 @@ export async function onRequestPut({ request, env }) {
         ? null : (body.show_in_men ? 1 : 0),
       body.show_in_women === undefined
         ? null : (body.show_in_women ? 1 : 0),
+      body.show_in_others === undefined
+        ? null : (body.show_in_others ? 1 : 0),
       id
     ).run();
 
@@ -243,7 +252,6 @@ export async function onRequestPut({ request, env }) {
       success: true,
       message: "Category updated successfully"
     });
-
   } catch (error) {
     console.error("ADMIN_CATEGORIES_PUT_ERROR:", error);
 
@@ -294,7 +302,6 @@ export async function onRequestDelete({ request, env }) {
       success: true,
       message: "Category deleted successfully"
     });
-
   } catch (error) {
     console.error("ADMIN_CATEGORIES_DELETE_ERROR:", error);
 
