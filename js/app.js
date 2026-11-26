@@ -186,7 +186,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         container.innerHTML = list.map(category => {
-          const icon = icons[category.slug] || "🛍️";
+          const icon = category.slug === "fashion"
+  ? (gender === "men" ? "👕" : gender === "women" ? "👗" : "🛍️")
+  : (icons[category.slug] || "🛍️");
           const image = String(category.image_url || "").trim();
 
           return `
