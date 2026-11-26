@@ -146,18 +146,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // LOAD CATEGORIES
-  
   async function loadCategories() {
     const menGrid = document.getElementById("menCategoryGrid");
     const womenGrid = document.getElementById("womenCategoryGrid");
     const otherGrid = document.getElementById("otherCategoryGrid");
 
+    // MEN AND WOMEN ICONS + OTHER CATEGORY ICONS
     const icons = {
-      electronics: "📱",
+      electronics: "💻",
       "mobiles-accessories": "📱",
-      fashion: "👗",
+      fashion: "🧥",
       "home-kitchen": "🏠",
-      "beauty-personal-care": "💄",
+      "beauty-personal-care": "🧴",
       "health-fitness": "💪",
       "sports-outdoors": "⚽",
       "grocery-daily-needs": "🛒",
@@ -186,33 +186,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         container.innerHTML = list.map(category => {
-          const icon = gender === "other"
-  ? (icons[category.slug] || "🛍️")
-  : category.slug === "fashion"
-    ? (gender === "men" ? "👕" : "👗")
-    : category.slug === "beauty-personal-care"
-      ? (gender === "men" ? "🧴" : "💄")
-      : (icons[category.slug] || "🛍️");
 
-const image = String(category.image_url || "").trim();
+          // OTHER CATEGORY ICONS ARE DIFFERENT
+          // MEN AND WOMEN ICONS REMAIN AS BEFORE
+          let icon;
 
-const categoryIcons = {
-  electronics: "💻",
-  "mobiles-accessories": "📱",
-  fashion: gender === "men" ? "👕" : gender === "women" ? "👗" : "👕",
-  "home-kitchen": "🏠",
-  "beauty-personal-care": gender === "men" ? "🧴" : "💄",
-  "health-fitness": "💪",
-  "sports-outdoors": "⚽",
-  "grocery-daily-needs": "🛒",
-  "shoes-footwear": "👟",
-  "bags-luggage": "👜",
-  "toys-baby-products": "🧸",
-  "books-stationery": "📚"
-};
+          if (gender === "other") {
+            icon = icons[category.slug] || "🛍️";
+          } else if (category.slug === "fashion") {
+            icon = gender === "men" ? "👕" : "👗";
+          } else if (category.slug === "beauty-personal-care") {
+            icon = gender === "men" ? "🧴" : "💄";
+          } else {
+            icon = icons[category.slug] || "🛍️";
+          }
 
-const icon = categoryIcons[category.slug] || "🛍️";
-const image = String(category.image_url || "").trim();
+          const image = String(category.image_url || "").trim();
 
           return `
             <a class="category-card ${image ? "has-image" : ""}"
@@ -263,7 +252,6 @@ const image = String(category.image_url || "").trim();
       });
     }
   }
-
 
   // LOAD PRODUCTS
   async function loadProducts() {
@@ -443,7 +431,9 @@ const image = String(category.image_url || "").trim();
   }
 
   function renderSuggestionCards(products, attribute) {
-    if (!products.length) return "<p>No other products available right now.</p>";
+    if (!products.length) {
+      return "<p>No other products available right now.</p>";
+    }
 
     return products.map(item => `
       <article class="related-product-card"
@@ -627,7 +617,6 @@ const image = String(category.image_url || "").trim();
   }
 
   // CATEGORY FILTER
-  
   function filterByCategory(categoryId, gender) {
     const filtered = allProducts.filter(product => {
       const sameCategory =
@@ -658,8 +647,7 @@ const image = String(category.image_url || "").trim();
     productSection?.scrollIntoView({ behavior: "smooth" });
   }
 
-
-    // CATEGORY CARD CLICK
+  // CATEGORY CARD CLICK
   const categoriesSection = document.getElementById("categories");
 
   if (categoriesSection) {
@@ -707,6 +695,8 @@ const image = String(category.image_url || "").trim();
 
     showProductModal(product);
   });
+
+  // MODAL BUY BUTTON
   productModal?.addEventListener("click", event => {
     const buyButton = event.target.closest(".modal-buy-buttons .platform-btn");
     if (!buyButton || !activeModalProduct) return;
