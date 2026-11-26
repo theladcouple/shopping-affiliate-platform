@@ -192,6 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ? (gender === "men" ? "🧴" : gender === "women" ? "💄" : "🛍️")
     : (icons[category.slug] || "🛍️");
 
+const image = String(category.image_url || "").trim();
+
           return `
             <a class="category-card ${image ? "has-image" : ""}"
                href="#products"
