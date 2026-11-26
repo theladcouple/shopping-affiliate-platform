@@ -706,37 +706,63 @@ async function loadCategories() {
       slug.textContent = category.slug;
       slug.style.color = "#64748b";
 
-      const visibilityLabel = document.createElement("label");
-visibilityLabel.textContent = "Display In: ";
+ const visibilityLabel = document.createElement("div");
+
+visibilityLabel.textContent = "Display In:";
 visibilityLabel.style.cssText =
   "display:block;margin-top:10px;font-weight:bold";
 
-const visibilitySelect = document.createElement("select");
-visibilitySelect.style.cssText =
-  "padding:8px;margin-top:5px;border:1px solid #cbd5e1;border-radius:5px";
+const menLabel = document.createElement("label");
 
-const visibilityOptions = [
-  { value: "men", text: "Men's Collection" },
-  { value: "women", text: "Women's Collection" },
-  { value: "other", text: "Other Categories" }
-];
+menLabel.style.cssText =
+  "display:block;margin-top:8px;cursor:pointer";
 
-visibilityOptions.forEach(optionData => {
-  const option = document.createElement("option");
-  option.value = optionData.value;
-  option.textContent = optionData.text;
-  visibilitySelect.append(option);
-});
+const menCheckbox = document.createElement("input");
 
-if (Number(category.show_in_men) === 1) {
-  visibilitySelect.value = "men";
-} else if (Number(category.show_in_women) === 1) {
-  visibilitySelect.value = "women";
-} else {
-  visibilitySelect.value = "other";
-}
+menCheckbox.type = "checkbox";
+menCheckbox.checked = Number(category.show_in_men) === 1;
 
-visibilityLabel.append(visibilitySelect);
+menLabel.append(menCheckbox, " Men's Collection");
+
+const womenLabel = document.createElement("label");
+
+womenLabel.style.cssText =
+  "display:block;margin-top:6px;cursor:pointer";
+
+const womenCheckbox = document.createElement("input");
+
+womenCheckbox.type = "checkbox";
+womenCheckbox.checked = Number(category.show_in_women) === 1;
+
+womenLabel.append(womenCheckbox, " Women's Collection");
+
+visibilityLabel.append(menLabel, womenLabel);
+
+details.append(name, slug, visibilityLabel);
+const visibilityLabel = document.createElement("div");
+visibilityLabel.textContent = "Display In:";
+visibilityLabel.style.cssText =
+  "display:block;margin-top:10px;font-weight:bold";
+
+const menLabel = document.createElement("label");
+menLabel.style.cssText = "display:block;margin-top:8px;cursor:pointer";
+
+const menCheckbox = document.createElement("input");
+menCheckbox.type = "checkbox";
+menCheckbox.checked = Number(category.show_in_men) === 1;
+
+menLabel.append(menCheckbox, " Men's Collection");
+
+const womenLabel = document.createElement("label");
+womenLabel.style.cssText = "display:block;margin-top:6px;cursor:pointer";
+
+const womenCheckbox = document.createElement("input");
+womenCheckbox.type = "checkbox";
+womenCheckbox.checked = Number(category.show_in_women) === 1;
+
+womenLabel.append(womenCheckbox, " Women's Collection");
+
+visibilityLabel.append(menLabel, womenLabel);
 details.append(name, slug, visibilityLabel);
 
       const actions = document.createElement("div");
@@ -763,8 +789,8 @@ details.append(name, slug, visibilityLabel);
               image_url: category.image_url || "",
               is_active: category.is_active,
               sort_order: category.sort_order,
-              show_in_men: visibilitySelect.value === "men" ? 1 : 0,
-show_in_women: visibilitySelect.value === "women" ? 1 : 0
+              show_in_men: menCheckbox.checked ? 1 : 0,
+show_in_women: womenCheckbox.checked ? 1 : 0
             })
           });
 
@@ -1122,7 +1148,7 @@ info.textContent =
   " | Category: " + (product.category_name || "None") +
   " | Price: ₹" + (product.price ?? "N/A") +
   " | Status: " + product.status;
-details.append(name, code, info);
+          details.append(name, code, info);
 
           const actions = document.createElement("div");
 
