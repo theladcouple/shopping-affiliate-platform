@@ -863,7 +863,57 @@ async function loadCategories() {
 
 loadCategories();
 
-    // PRODUCT MANAGEMENT
+// ADD CATEGORY
+categoryForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const message = document.getElementById("categoryMessage");
+  const submitButton = categoryForm.querySelector('button[type="submit"]');
+
+  const categoryData = {
+    name: document.getElementById("categoryName").value.trim(),
+    slug: document.getElementById("categorySlug").value.trim(),
+    description: document.getElementById("categoryDescription").value.trim(),
+    image_url: document.getElementById("categoryImage").value.trim(),
+    sort_order: Number(document.getElementById("categoryOrder").value)
+  };
+
+  try {
+    submitButton.disabled = true;
+    message.textContent = "Adding category...";
+
+    const response = await fetch("/api/admin/categories", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(categoryData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Unable to add category");
+    }
+
+    message.textContent = "Category added successfully! Code: " + data.category_code;
+    message.style.color = "green";
+
+    categoryForm.reset();
+    document.getElementById("categoryOrder").value = 0;
+
+    await loadCategories();
+
+  } catch (error) {
+    message.textContent = error.message;
+    message.style.color = "red";
+  } finally {
+    submitButton.disabled = false;
+  }
+});
+
+// PRODUCT MANAGEMENT
 // PRODUCT IMAGE UPLOAD
 
 const productImageFile = document.getElementById("productImageFile");
