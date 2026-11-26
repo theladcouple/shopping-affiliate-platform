@@ -377,7 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 Product Code
               </span>
 
-              <div style="display:flex;align-items:center;gap:8px;">
+              <div class="product-code-actions">
                 <strong style="
                   color:#b83268;
                   font-size:14px;
@@ -531,7 +531,7 @@ document.addEventListener("DOMContentLoaded", () => {
               Product Code
             </span>
 
-            <div style="display:flex;align-items:center;gap:8px;">
+            <div class="product-code-actions">
               <strong style="color:#b83268;letter-spacing:1px;">
                 ${escapeHTML(product.product_code || "Not assigned")}
               </strong>
