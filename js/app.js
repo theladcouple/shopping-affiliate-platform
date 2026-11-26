@@ -146,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // LOAD CATEGORIES
+  
   async function loadCategories() {
     const menGrid = document.getElementById("menCategoryGrid");
     const womenGrid = document.getElementById("womenCategoryGrid");
@@ -220,8 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       const otherCategories = categories.filter(category =>
-        Number(category.show_in_men) !== 1 &&
-        Number(category.show_in_women) !== 1
+        Number(category.show_in_others) === 1
       );
 
       renderCategoryCards(menCategories, "men", menGrid);
@@ -238,6 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   }
+
 
   // LOAD PRODUCTS
   async function loadProducts() {
@@ -601,16 +602,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // CATEGORY FILTER
+  
   function filterByCategory(categoryId, gender) {
     const filtered = allProducts.filter(product => {
-      const productGender = String(product.gender || "")
-        .trim()
-        .toLowerCase();
-
       const sameCategory =
         Number(product.category_id) === Number(categoryId);
 
       if (!sameCategory) return false;
+
+      const productGender = String(product.gender || "")
+        .trim()
+        .toLowerCase();
 
       if (gender === "men") {
         return productGender === "men";
@@ -620,15 +622,19 @@ document.addEventListener("DOMContentLoaded", () => {
         return productGender === "women";
       }
 
-      return productGender !== "men" &&
-             productGender !== "women";
+      if (gender === "other") {
+        return true;
+      }
+
+      return false;
     });
 
     renderProducts(filtered);
     productSection?.scrollIntoView({ behavior: "smooth" });
   }
 
-  // CATEGORY CARD CLICK
+
+    // CATEGORY CARD CLICK
   const categoriesSection = document.getElementById("categories");
 
   if (categoriesSection) {
@@ -676,8 +682,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     showProductModal(product);
   });
-
-  // MODAL BUY BUTTON
   productModal?.addEventListener("click", event => {
     const buyButton = event.target.closest(".modal-buy-buttons .platform-btn");
     if (!buyButton || !activeModalProduct) return;
