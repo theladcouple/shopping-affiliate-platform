@@ -1286,4 +1286,9 @@ body.modal-open {
     font-weight: 700;
   }
 }
-
+@media (max-width: 600px) {
+  .product-info > div:has(.product-code-actions) > span,
+  .modal-product-info > div:has(.product-code-actions) > span {
+    display: none !important;
+  }
+}
