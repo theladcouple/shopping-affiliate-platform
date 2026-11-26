@@ -1210,3 +1210,43 @@ body.modal-open {
     margin-top: 10px;
   }
 }
+
+/* PRODUCT CODE MOBILE FIX */
+
+.product-code-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.copy-code-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 7px 12px !important;
+  border: 1px solid #b83268 !important;
+  border-radius: 6px;
+  background: #ffffff !important;
+  color: #b83268 !important;
+  font-size: 12px !important;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .product-code-actions {
+    gap: 6px;
+  }
+
+  .copy-code-btn {
+    min-height: 40px;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+  }
+}
