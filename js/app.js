@@ -6,7 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const productContainer = productSection.querySelector(".empty-products");
 
   let allProducts = [];
-
+const menProductContainer = document.getElementById("menProductGrid");
+const womenProductContainer = document.getElementById("womenProductGrid");
   
 
   async function loadSiteSettings() {
@@ -183,7 +184,24 @@ updateLogo("siteLogoFooter");
       }
 
       allProducts = data.products || [];
-      renderProducts(allProducts);
+
+renderProducts(
+  allProducts.filter(product => Number(product.is_featured) === 1)
+);
+
+renderProducts(
+  allProducts.filter(product =>
+    String(product.gender || "").trim().toLowerCase() === "men"
+  ),
+  menProductContainer
+);
+
+renderProducts(
+  allProducts.filter(product =>
+    String(product.gender || "").trim().toLowerCase() === "women"
+  ),
+  womenProductContainer
+);
     } catch (error) {
       productContainer.innerHTML = `
         <h3>Unable to load products</h3>
@@ -216,11 +234,11 @@ categoryGrid.addEventListener("click", event => {
 });
 
 
-function renderProducts(products) {
+function renderProducts(products, targetContainer = productContainer) {
 
   if (!products.length) {
-    productContainer.className = "empty-products";
-    productContainer.innerHTML = `
+    targetContainer.className = "empty-products";
+    targetContainer.innerHTML = `
       <span>🛒</span>
       <h3>Products Coming Soon</h3>
       <p>We are preparing amazing products for you. Stay tuned!</p>
@@ -228,9 +246,9 @@ function renderProducts(products) {
     return;
   }
 
-  productContainer.className = "product-grid";
+  targetContainer.className = "product-grid";
 
-  productContainer.innerHTML = products.map(product => {
+  targetContainer.innerHTML = products.map(product => {
 
     const platforms = [
       {
@@ -529,9 +547,7 @@ const relatedHTML = relatedProducts.length
     productModal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
 
-    if (searchInput.value.trim() === "") {
-      renderProducts(allProducts);
-    }
+    
 }
   // BEFORE BUY SUGGESTION POPUP
 
@@ -646,7 +662,7 @@ beforeBuyProducts.innerHTML = relatedProducts.length
     }
   });
    // Product card and Buy Now click handling.
-  productContainer.addEventListener("click", event => {
+  document.addEventListener("click", event => {
 if (event.target.closest(".copy-code-btn")) return;
     const card = event.target.closest(".product-card");
 
@@ -757,8 +773,10 @@ function searchProducts() {
 
   searchInput.value = "";
 
-  if (!term) {
-    renderProducts(allProducts);
+    if (!term) {
+    renderProducts(
+      allProducts.filter(product => Number(product.is_featured) === 1)
+    );
     return;
   }
 
