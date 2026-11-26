@@ -1,114 +1,4 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Lad Couple Admin Login</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, #172033, #334155);
-      padding: 20px;
-    }
-
-    .login-card {
-      width: 100%;
-      max-width: 410px;
-      background: white;
-      padding: 38px;
-      border-radius: 18px;
-      box-shadow: 0 20px 60px #0003;
-    }
-
-    .logo {
-      text-align: center;
-      font-size: 28px;
-      font-weight: 800;
-      margin-bottom: 8px;
-      color: #172033;
-    }
-
-    .logo span {
-      color: #f97316;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #64748b;
-      margin-bottom: 30px;
-    }
-
-    label {
-      display: block;
-      font-weight: 700;
-      font-size: 14px;
-      margin: 18px 0 8px;
-    }
-
-    input {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #cbd5e1;
-      border-radius: 9px;
-      font-size: 15px;
-      outline: none;
-    }
-
-    input:focus {
-      border-color: #f97316;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 25px;
-      padding: 14px;
-      background: #f97316;
-      color: white;
-      border: none;
-      border-radius: 9px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .notice {
-      text-align: center;
-      color: #64748b;
-      font-size: 12px;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-
-  <main class="login-card">
-    <div class="logo">The Lad Couple</div>
-    <p class="subtitle">Administrator Login</p>
-
-    <form id="loginForm">
-      <label for="email">Admin Email</label>
-      <input type="email" id="email" placeholder="Enter admin email" required>
-
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Enter password" required>
-
-      <button type="submit">Login to Dashboard</button>
-    </form>
-
-    <p class="notice">Secure administrator access</p>
-  </main>
-
-  
 <script>
   document.getElementById("loginForm").addEventListener("submit", async function(event) {
     event.preventDefault();
@@ -136,9 +26,7 @@
     try {
       const response = await fetch("/api/admin/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
         body: JSON.stringify({ email, password })
       });
@@ -149,7 +37,85 @@
         throw new Error(data.error || "Login failed");
       }
 
+      if (data.requires_totp) {
+        let otpInput = document.getElementById("totpCode");
+
+        if (!otpInput) {
+          const label = document.createElement("label");
+          label.textContent = "Google Authenticator OTP";
+          label.htmlFor = "totpCode";
+
+          otpInput = document.createElement("input");
+          otpInput.id = "totpCode";
+          otpInput.type = "text";
+          otpInput.inputMode = "numeric";
+          otpInput.maxLength = 6;
+          otpInput.placeholder = "Enter 6-digit OTP";
+          otpInput.autocomplete = "one-time-code";
+          otpInput.required = true;
+
+          form.insertBefore(label, button);
+          form.insertBefore(otpInput, button);
+        }
+
+        otpInput.value = "";
+        otpInput.focus();
+        otpInput.addEventListener("input", () => {
+          otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
+        });
+
+        message.textContent = "Enter your Google Authenticator OTP.";
+        button.textContent = "Verify OTP";
+        button.disabled = false;
+
+        form.onsubmit = async function(otpEvent) {
+          otpEvent.preventDefault();
+
+          const code = otpInput.value;
+
+          if (!/^\d{6}$/.test(code)) {
+            message.style.color = "red";
+            message.textContent = "Enter a valid 6-digit OTP.";
+            return;
+          }
+
+          button.disabled = true;
+          button.textContent = "Verifying...";
+
+          try {
+            const otpResponse = await fetch("/api/admin/totp-login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "same-origin",
+              body: JSON.stringify({
+                challenge_token: data.challenge_token,
+                code
+              })
+            });
+
+            const otpData = await otpResponse.json();
+
+            if (!otpResponse.ok || !otpData.success) {
+              throw new Error(otpData.error || "OTP verification failed");
+            }
+
             message.style.color = "green";
+            message.textContent = "Login successful! Redirecting...";
+
+            window.location.href = "/admin/dashboard.html";
+
+          } catch (error) {
+            message.style.color = "red";
+            message.textContent = error.message;
+            button.disabled = false;
+            button.textContent = "Verify OTP";
+          }
+        };
+
+        return;
+      }
+
+      message.style.color = "green";
       message.textContent = "Login successful! Redirecting to dashboard...";
 
       form.reset();
@@ -157,18 +123,12 @@
       setTimeout(() => {
         window.location.href = "/admin/dashboard.html";
       }, 500);
-      form.reset();
 
     } catch (error) {
       message.style.color = "red";
       message.textContent = error.message || "Unable to connect. Please try again.";
-    } finally {
       button.disabled = false;
       button.textContent = "Login to Dashboard";
     }
   });
 </script>
-</body>
-</html>
-
-
