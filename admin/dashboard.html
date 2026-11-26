@@ -706,23 +706,38 @@ async function loadCategories() {
       slug.textContent = category.slug;
       slug.style.color = "#64748b";
 
-      const menLabel = document.createElement("label");
-      menLabel.style.cssText = "display:block;margin-top:10px;cursor:pointer";
+      const visibilityLabel = document.createElement("label");
+visibilityLabel.textContent = "Display In: ";
+visibilityLabel.style.cssText =
+  "display:block;margin-top:10px;font-weight:bold";
 
-      const menCheckbox = document.createElement("input");
-      menCheckbox.type = "checkbox";
-      menCheckbox.checked = Number(category.show_in_men) === 1;
-      menLabel.append(menCheckbox, " Show in Men");
+const visibilitySelect = document.createElement("select");
+visibilitySelect.style.cssText =
+  "padding:8px;margin-top:5px;border:1px solid #cbd5e1;border-radius:5px";
 
-      const womenLabel = document.createElement("label");
-      womenLabel.style.cssText = "display:block;margin-top:6px;cursor:pointer";
+const visibilityOptions = [
+  { value: "men", text: "Men's Collection" },
+  { value: "women", text: "Women's Collection" },
+  { value: "other", text: "Other Categories" }
+];
 
-      const womenCheckbox = document.createElement("input");
-      womenCheckbox.type = "checkbox";
-      womenCheckbox.checked = Number(category.show_in_women) === 1;
-      womenLabel.append(womenCheckbox, " Show in Women");
+visibilityOptions.forEach(optionData => {
+  const option = document.createElement("option");
+  option.value = optionData.value;
+  option.textContent = optionData.text;
+  visibilitySelect.append(option);
+});
 
-      details.append(name, slug, menLabel, womenLabel);
+if (Number(category.show_in_men) === 1) {
+  visibilitySelect.value = "men";
+} else if (Number(category.show_in_women) === 1) {
+  visibilitySelect.value = "women";
+} else {
+  visibilitySelect.value = "other";
+}
+
+visibilityLabel.append(visibilitySelect);
+details.append(name, slug, visibilityLabel);
 
       const actions = document.createElement("div");
 
@@ -748,8 +763,8 @@ async function loadCategories() {
               image_url: category.image_url || "",
               is_active: category.is_active,
               sort_order: category.sort_order,
-              show_in_men: menCheckbox.checked ? 1 : 0,
-              show_in_women: womenCheckbox.checked ? 1 : 0
+              show_in_men: visibilitySelect.value === "men" ? 1 : 0,
+show_in_women: visibilitySelect.value === "women" ? 1 : 0
             })
           });
 
