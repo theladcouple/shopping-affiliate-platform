@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authenticator Setup - The Lad Couple</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 25px 15px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 450px;
+      margin: 40px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px #00000012;
+    }
+
+    h2 { margin-top: 0; }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      background: #111;
+      color: white;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      margin-top: 12px;
+      font-size: 15px;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 7px;
+      font-size: 18px;
+      letter-spacing: 4px;
+    }
+
+    .secret {
+      padding: 14px;
+      background: #f1f1f1;
+      border-radius: 7px;
+      overflow-wrap: anywhere;
+      font-weight: bold;
+      user-select: all;
+    }
+
+    #setupArea { display: none; }
+    #message { margin-top: 15px; }
+    .note { color: #555; font-size: 14px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Google Authenticator Setup</h2>
+
+    <p class="note">
+      Enable two-step verification for your Admin account.
+    </p>
+
+    <button id="startButton">Generate Authenticator Secret</button>
+
+    <div id="setupArea">
+      <h3>Step 1: Add this key to Google Authenticator</h3>
+
+      <p class="note">
+        Open Google Authenticator → Add a code → Enter a setup key.
+        Account name: The Lad Couple
+      </p>
+
+      <div class="secret" id="secret"></div>
+      <button id="copyButton">Copy Secret Key</button>
+
+      <h3>Step 2: Verify your 6-digit OTP</h3>
+
+      <input
+        id="otp"
+        type="text"
+        inputmode="numeric"
+        maxlength="6"
+        placeholder="Enter 6-digit OTP"
+        autocomplete="one-time-code"
+      >
+
+      <button id="verifyButton">Verify & Enable</button>
+    </div>
+
+    <p id="message" role="status"></p>
+  </div>
+
+  <script>
+    const startButton = document.getElementById("startButton");
+    const setupArea = document.getElementById("setupArea");
+    const secretBox = document.getElementById("secret");
+    const otpInput = document.getElementById("otp");
+    const message = document.getElementById("message");
+
+    startButton.addEventListener("click", async () => {
+      startButton.disabled = true;
+      message.textContent = "Generating secret...";
+
+      try {
+        const response = await fetch("/api/admin/totp-setup", {
+          method: "POST",
+          credentials: "same-origin"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Setup failed");
+        }
+
+        secretBox.textContent = data.secret;
+        setupArea.style.display = "block";
+        startButton.style.display = "none";
+        message.textContent = "Secret generated. Add it to Google Authenticator.";
+      } catch (error) {
+        message.textContent = error.message;
+        startButton.disabled = false;
+      }
+    });
+
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(secretBox.textContent);
+        message.textContent = "Secret copied.";
+      } catch {
+        message.textContent = "Copy failed. Select and copy the key manually.";
+      }
+    });
+
+    otpInput.addEventListener("input", () => {
+      otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
+    });
+
+    document.getElementById("verifyButton").addEventListener("click", async () => {
+      const code = otpInput.value;
+
+      if (!/^\d{6}$/.test(code)) {
+        message.textContent = "Enter a valid 6-digit OTP.";
+        return;
+      }
+
+      const verifyButton = document.getElementById("verifyButton");
+      verifyButton.disabled = true;
+      message.textContent = "Verifying OTP...";
+
+      try {
+        const response = await fetch("/api/admin/totp-verify", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "OTP verification failed");
+        }
+
+        setupArea.style.display = "none";
+        message.textContent = "Google Authenticator enabled successfully.";
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        verifyButton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
