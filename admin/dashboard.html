@@ -712,31 +712,33 @@ visibilityLabel.textContent = "Display In:";
 visibilityLabel.style.cssText =
   "display:block;margin-top:10px;font-weight:bold";
 
-const menLabel = document.createElement("label");
 
-menLabel.style.cssText =
-  "display:block;margin-top:8px;cursor:pointer";
+const menLabel = document.createElement("label");
+menLabel.style.cssText = "display:block;margin-top:8px;cursor:pointer";
 
 const menCheckbox = document.createElement("input");
-
 menCheckbox.type = "checkbox";
 menCheckbox.checked = Number(category.show_in_men) === 1;
-
 menLabel.append(menCheckbox, " Men's Collection");
 
 const womenLabel = document.createElement("label");
-
-womenLabel.style.cssText =
-  "display:block;margin-top:6px;cursor:pointer";
+womenLabel.style.cssText = "display:block;margin-top:6px;cursor:pointer";
 
 const womenCheckbox = document.createElement("input");
-
 womenCheckbox.type = "checkbox";
 womenCheckbox.checked = Number(category.show_in_women) === 1;
-
 womenLabel.append(womenCheckbox, " Women's Collection");
 
-visibilityLabel.append(menLabel, womenLabel);
+const othersLabel = document.createElement("label");
+othersLabel.style.cssText = "display:block;margin-top:6px;cursor:pointer";
+
+const othersCheckbox = document.createElement("input");
+othersCheckbox.type = "checkbox";
+othersCheckbox.checked = Number(category.show_in_others) === 1;
+othersLabel.append(othersCheckbox, " Other Categories");
+
+visibilityLabel.append(menLabel, womenLabel, othersLabel);
+
 
 
 details.append(name, slug, visibilityLabel);
@@ -766,7 +768,8 @@ details.append(name, slug, visibilityLabel);
               is_active: category.is_active,
               sort_order: category.sort_order,
               show_in_men: menCheckbox.checked ? 1 : 0,
-show_in_women: womenCheckbox.checked ? 1 : 0
+show_in_women: womenCheckbox.checked ? 1 : 0,
+show_in_others: othersCheckbox.checked ? 1 : 0
             })
           });
 
@@ -820,7 +823,8 @@ show_in_women: womenCheckbox.checked ? 1 : 0
               is_active: category.is_active,
               sort_order: Number(order),
               show_in_men: Number(category.show_in_men),
-              show_in_women: Number(category.show_in_women)
+show_in_women: Number(category.show_in_women),
+show_in_others: Number(category.show_in_others)
             })
           });
 
