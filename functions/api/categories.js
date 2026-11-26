@@ -10,7 +10,8 @@ export async function onRequestGet({ env }) {
         image_url,
         sort_order,
         show_in_men,
-        show_in_women
+        show_in_women,
+        show_in_others
       FROM categories
       WHERE is_active = 1
       ORDER BY sort_order ASC, name ASC
