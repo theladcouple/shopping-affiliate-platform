@@ -1292,3 +1292,61 @@ body.modal-open {
     display: none !important;
   }
 }
+
+/* DESKTOP PRODUCT CODE FIX */
+
+@media (min-width: 601px) {
+
+  .product-info > div:has(.product-code-actions),
+  .modal-product-info > div:has(.product-code-actions) {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    min-width: 0;
+    padding: 10px;
+    margin-top: 8px;
+    background: #f8fafc;
+    border: 1px solid #e8edf3;
+    border-radius: 8px;
+  }
+
+  .product-info > div:has(.product-code-actions) > span,
+  .modal-product-info > div:has(.product-code-actions) > span {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .product-code-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .product-code-actions strong {
+    display: block;
+    color: #172033;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .copy-code-btn {
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 34px;
+    padding: 7px 12px !important;
+    margin: 0;
+    background: #b83268 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 6px;
+    font-size: 12px !important;
+  }
+}
