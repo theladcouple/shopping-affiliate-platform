@@ -50,7 +50,19 @@ function validateCategory(body) {
       return "Invalid image URL";
     }
   }
+  if (
+    body.show_in_men !== undefined &&
+    ![0, 1, true, false].includes(body.show_in_men)
+  ) {
+    return "Invalid Men visibility";
+  }
 
+  if (
+    body.show_in_women !== undefined &&
+    ![0, 1, true, false].includes(body.show_in_women)
+  ) {
+    return "Invalid Women visibility";
+  }
   return null;
 }
 
@@ -199,9 +211,25 @@ export async function onRequestPut({ request, env }) {
         description = ?,
         image_url = ?,
         is_active = ?,
-        sort_order = ?
+        sort_order = ?,
+        show_in_men = COALESCE(?, show_in_men),
+        show_in_women = COALESCE(?, show_in_women)
       WHERE id = ?
     `).bind(
+      body.name.trim(),
+      body.slug.trim(),
+      typeof body.description === "string"
+        ? body.description.trim() || null : null,
+      typeof body.image_url === "string"
+        ? body.image_url.trim() || null : null,
+      body.is_active === undefined ? 1 : (body.is_active ? 1 : 0),
+      body.sort_order === undefined ? 0 : Number(body.sort_order),
+      body.show_in_men === undefined
+        ? null : (body.show_in_men ? 1 : 0),
+      body.show_in_women === undefined
+        ? null : (body.show_in_women ? 1 : 0),
+      id
+    ).run();
       body.name.trim(),
       body.slug.trim(),
       typeof body.description === "string"
