@@ -142,9 +142,10 @@ export async function onRequestPost({ request, env }) {
 
     const result = await env.DB.prepare(`
       INSERT INTO categories (
-        name, slug, code, description, image_url, is_active, sort_order
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+  name, slug, code, description, image_url,
+  is_active, sort_order, show_in_men, show_in_women
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)
     `).bind(
       body.name.trim(),
       body.slug.trim(),
