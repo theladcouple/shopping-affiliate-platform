@@ -186,12 +186,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         container.innerHTML = list.map(category => {
-          const icon = category.slug === "fashion"
-  ? (gender === "men" ? "👕" : gender === "women" ? "👗" : "🛍️")
-  : category.slug === "beauty-personal-care"
-    ? (gender === "men" ? "🧴" : gender === "women" ? "💄" : "🛍️")
-    : (icons[category.slug] || "🛍️");
+          const icon = gender === "other"
+  ? (icons[category.slug] || "🛍️")
+  : category.slug === "fashion"
+    ? (gender === "men" ? "👕" : "👗")
+    : category.slug === "beauty-personal-care"
+      ? (gender === "men" ? "🧴" : "💄")
+      : (icons[category.slug] || "🛍️");
 
+const image = String(category.image_url || "").trim();
+
+const categoryIcons = {
+  electronics: "💻",
+  "mobiles-accessories": "📱",
+  fashion: gender === "men" ? "👕" : gender === "women" ? "👗" : "👕",
+  "home-kitchen": "🏠",
+  "beauty-personal-care": gender === "men" ? "🧴" : "💄",
+  "health-fitness": "💪",
+  "sports-outdoors": "⚽",
+  "grocery-daily-needs": "🛒",
+  "shoes-footwear": "👟",
+  "bags-luggage": "👜",
+  "toys-baby-products": "🧸",
+  "books-stationery": "📚"
+};
+
+const icon = categoryIcons[category.slug] || "🛍️";
 const image = String(category.image_url || "").trim();
 
           return `
