@@ -668,20 +668,214 @@
     
     const categoryForm = document.getElementById("categoryForm");
 
-    async function loadCategories() {
-      const list = document.getElementById("categoryList");
+    
+async function loadCategories() {
+  const list = document.getElementById("categoryList");
 
-      try {
-        const response = await fetch("/api/admin/categories", {
-          credentials: "same-origin",
-          cache: "no-store"
-        });
+  try {
+    const response = await fetch("/api/admin/categories", {
+      credentials: "same-origin",
+      cache: "no-store"
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || "Unable to load categories");
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Unable to load categories");
+    }
+
+    document.getElementById("totalCategories").textContent =
+      data.categories.length;
+
+    list.replaceChildren();
+
+    if (data.categories.length === 0) {
+      list.textContent = "No categories added yet.";
+      return;
+    }
+
+    data.categories.forEach(category => {
+      const item = document.createElement("div");
+
+      item.style.cssText =
+        "padding:15px 0;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap";
+
+      const details = document.createElement("div");
+
+      const name = document.createElement("strong");
+      name.textContent = category.name;
+
+      const slug = document.createElement("p");
+      slug.textContent = category.slug;
+      slug.style.color = "#64748b";
+
+      const menLabel = document.createElement("label");
+      menLabel.style.cssText =
+        "display:block;margin-top:10px;cursor:pointer";
+
+      const menCheckbox = document.createElement("input");
+      menCheckbox.type = "checkbox";
+      menCheckbox.checked = Number(category.show_in_men) === 1;
+
+      menLabel.append(menCheckbox, " Show in Men");
+
+      const womenLabel = document.createElement("label");
+      womenLabel.style.cssText =
+        "display:block;margin-top:6px;cursor:pointer";
+
+      const womenCheckbox = document.createElement("input");
+      womenCheckbox.type = "checkbox";
+      womenCheckbox.checked = Number(category.show_in_women) === 1;
+
+      womenLabel.append(womenCheckbox, " Show in Women");
+
+      details.append(name, slug, menLabel, womenLabel);
+
+      const actions = document.createElement("div");
+
+      const saveVisibility = document.createElement("button");
+      saveVisibility.textContent = "Save Visibility";
+      saveVisibility.style.cssText =
+        "padding:8px 12px;background:#2563eb;color:white;border:0;border-radius:5px;cursor:pointer;margin-right:8px";
+
+      saveVisibility.onclick = async () => {
+        saveVisibility.disabled = true;
+        saveVisibility.textContent = "Saving...";
+
+        try {
+          const result = await fetch("/api/admin/categories", {
+            method: "PUT",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: category.id,
+              name: category.name,
+              slug: category.slug,
+              description: category.description || "",
+              image_url: category.image_url || "",
+              is_active: category.is_active,
+              sort_order: category.sort_order,
+              show_in_men: menCheckbox.checked ? 1 : 0,
+              show_in_women: womenCheckbox.checked ? 1 : 0
+            })
+          });
+
+          const resultData = await result.json();
+
+          if (!result.ok || !resultData.success) {
+            throw new Error(resultData.error || "Visibility update failed");
+          }
+
+          alert("Category visibility saved successfully!");
+          await loadCategories();
+
+        } catch (error) {
+          alert(error.message);
+          saveVisibility.disabled = false;
+          saveVisibility.textContent = "Save Visibility";
         }
+      };
+
+      const edit = document.createElement("button");
+      edit.textContent = "Edit";
+      edit.style.cssText =
+        "padding:8px 12px;margin-right:8px;cursor:pointer";
+
+      edit.onclick = async () => {
+        const nameValue = prompt("Category name:", category.name);
+        if (nameValue === null) return;
+
+        const slugValue = prompt("Category slug:", category.slug);
+        if (slugValue === null) return;
+
+        const description = prompt(
+          "Description:",
+          category.description || ""
+        );
+        if (description === null) return;
+
+        const image = prompt(
+          "Image URL:",
+          category.image_url || ""
+        );
+        if (image === null) return;
+
+        const order = prompt(
+          "Sort order:",
+          String(category.sort_order)
+        );
+        if (order === null) return;
+
+        try {
+          const result = await fetch("/api/admin/categories", {
+            method: "PUT",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: category.id,
+              name: nameValue,
+              slug: slugValue,
+              description,
+              image_url: image,
+              is_active: category.is_active,
+              sort_order: Number(order)
+            })
+          });
+
+          const resultData = await result.json();
+
+          if (!result.ok || !resultData.success) {
+            throw new Error(resultData.error || "Update failed");
+          }
+
+          alert("Category updated successfully.");
+          loadCategories();
+
+        } catch (error) {
+          alert(error.message);
+        }
+      };
+
+      const remove = document.createElement("button");
+      remove.textContent = "Delete";
+      remove.style.cssText =
+        "padding:8px 12px;background:#dc2626;color:white;border:0;border-radius:5px;cursor:pointer";
+
+      remove.onclick = async () => {
+        if (!confirm("Delete this category?")) return;
+
+        try {
+          const result = await fetch("/api/admin/categories", {
+            method: "DELETE",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: category.id })
+          });
+
+          const resultData = await result.json();
+
+          if (!result.ok || !resultData.success) {
+            throw new Error(resultData.error || "Delete failed");
+          }
+
+          alert("Category deleted successfully.");
+          loadCategories();
+
+        } catch (error) {
+          alert(error.message);
+        }
+      };
+
+      actions.append(saveVisibility, edit, remove);
+      item.append(details, actions);
+      list.append(item);
+    });
+
+  } catch (error) {
+    list.textContent = error.message;
+  }
+}
+
 document.getElementById("totalCategories").textContent =
   data.categories.length;
         list.replaceChildren();
