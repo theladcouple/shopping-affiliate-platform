@@ -1,4 +1,3 @@
-
 import { requireAdmin } from "./_auth.js";
 
 function json(data, status = 200) {
