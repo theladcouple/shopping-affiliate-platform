@@ -293,10 +293,10 @@ document.addEventListener("DOMContentLoaded", () => {
         className: "amazon"
       },
       {
-        name: "Flipkart",
+        name: "Myntra",
         icon: "🛍️",
-        url: String(product.flipkart_url || "").trim(),
-        className: "flipkart"
+        url: String(product.Myntra_url || "").trim(),
+        className: "Myntra"
       },
       {
         name: "Meesho",
@@ -685,7 +685,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const platform = getProductPlatforms(product).find(item =>
         item.className ===
         (buyButton.classList.contains("amazon") ? "amazon" :
-         buyButton.classList.contains("flipkart") ? "flipkart" :
+         buyButton.classList.contains("Myntra") ? "Myntra" :
          buyButton.classList.contains("meesho") ? "meesho" : "")
       );
 
@@ -706,7 +706,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const platform = getProductPlatforms(activeModalProduct).find(item =>
       item.className ===
       (buyButton.classList.contains("amazon") ? "amazon" :
-       buyButton.classList.contains("flipkart") ? "flipkart" :
+       buyButton.classList.contains("Myntra") ? "Myntra" :
        buyButton.classList.contains("meesho") ? "meesho" : "")
     );
 
