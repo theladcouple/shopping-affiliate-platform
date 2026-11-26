@@ -27,7 +27,9 @@ function validateProduct(body) {
   if (!["draft", "published"].includes(body.status)) {
     return "Invalid product status";
   }
-
+if (!["Men", "Women"].includes(body.gender)) {
+  return "Please select Men or Women";
+}
   for (const field of ["price", "original_price"]) {
     if (
       body[field] !== null &&
@@ -105,8 +107,9 @@ function productValues(body) {
     optionalText(body.amazon_url),
     optionalText(body.flipkart_url),
     optionalText(body.meesho_url),
-    body.is_featured ? 1 : 0,
-    body.status
+        body.is_featured ? 1 : 0,
+    body.status,
+    body.gender
   ];
 }
 
@@ -215,13 +218,14 @@ export async function onRequestPost({ request, env }) {
         meesho_url,
         is_featured,
         status,
-        product_code
+        product_code,
+        gender
       )
       SELECT
         ?, ?, ?, ?, ?, ?,
         c.id,
         ?, ?, ?, ?, ?,
-        c.code || '-' || printf(
+                c.code || '-' || printf(
           '%04d',
           COALESCE(
             (
@@ -239,7 +243,8 @@ export async function onRequestPost({ request, env }) {
             ),
             0
           ) + 1
-        )
+        ),
+        ?
       FROM categories c
       WHERE c.id = ?
         AND c.is_active = 1
@@ -255,7 +260,8 @@ export async function onRequestPost({ request, env }) {
       values[9],
       values[10],
       values[11],
-      values[6]
+      values[6],
+      values[12]
     ).run();
 
     if (!result.meta.changes) {
@@ -354,6 +360,7 @@ export async function onRequestPut({ request, env }) {
         meesho_url = ?,
         is_featured = ?,
         status = ?,
+        gender = ?,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `).bind(...values, id).run();
