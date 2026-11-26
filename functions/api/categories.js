@@ -1,7 +1,8 @@
+
 export async function onRequestGet({ env }) {
   try {
     const result = await env.DB.prepare(`
-            SELECT
+      SELECT
         id,
         name,
         slug,
@@ -15,15 +16,23 @@ export async function onRequestGet({ env }) {
       ORDER BY sort_order ASC, name ASC
     `).all();
 
-    return Response.json({
-      success: true,
-      categories: result.results || []
-    });
+    return Response.json(
+      {
+        success: true,
+        categories: result.results || []
+      },
+      { status: 200 }
+    );
 
   } catch (error) {
-    return Response.json({
-      success: false,
-      error: "Unable to load categories"
-    }, { status: 500 });
+    console.error("PUBLIC_CATEGORIES_GET_ERROR:", error);
+
+    return Response.json(
+      {
+        success: false,
+        error: "Unable to load categories"
+      },
+      { status: 500 }
+    );
   }
 }
