@@ -2,13 +2,15 @@
 export async function onRequestGet({ env }) {
   try {
     const result = await env.DB.prepare(`
-      SELECT
+            SELECT
         id,
         name,
         slug,
         description,
         image_url,
-        sort_order
+        sort_order,
+        show_in_men,
+        show_in_women
       FROM categories
       WHERE is_active = 1
       ORDER BY sort_order ASC, name ASC
