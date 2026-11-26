@@ -1,4 +1,3 @@
-
 export async function onRequestGet({ env }) {
   try {
     const result = await env.DB.prepare(`
